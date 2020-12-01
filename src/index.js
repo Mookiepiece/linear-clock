@@ -3,6 +3,7 @@ import express from 'express';
 let app = require('./server').default;
 
 debugger;
+aazfsdsdd;
 
 if (module.hot) {
   module.hot.accept('./server', function () {
