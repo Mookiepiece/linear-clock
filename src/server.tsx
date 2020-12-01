@@ -4,13 +4,13 @@ import { StaticRouter } from 'react-router-dom';
 import express from 'express';
 import { renderToString } from 'react-dom/server';
 
-const assets = require(process.env.RAZZLE_ASSETS_MANIFEST);
+const assets = require(process.env.RAZZLE_ASSETS_MANIFEST!);
 
 const server = express();
 server
   .disable('x-powered-by')
-  .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
-  .get('/*', (req, res) => {
+  .use(express.static(process.env.RAZZLE_PUBLIC_DIR!))
+  .get('/*', (req: express.Request, res: express.Response) => {
     const context = {};
     const markup = renderToString(
       <StaticRouter context={context} location={req.url}>
@@ -18,11 +18,8 @@ server
       </StaticRouter>
     );
 
-    if (context.url) {
-      res.redirect(context.url);
-    } else {
-      res.status(200).send(
-        `<!doctype html>
+    res.status(200).send(
+      `<!doctype html>
     <html lang="">
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -40,8 +37,7 @@ server
         <div id="root">${markup}</div>
     </body>
 </html>`
-      );
-    }
+    );
   });
 
 export default server;
