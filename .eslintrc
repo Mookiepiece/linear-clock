@@ -23,5 +23,5 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {},
-  "ignorePatterns": ["src/**/*.test.js"]
+  "ignorePatterns": ["src/**/*.test.tsx"]
 }
