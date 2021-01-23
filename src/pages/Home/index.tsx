@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './react.svg';
 import './Home.css';
+import { Link } from 'react-router-dom';
 
 class Home extends React.Component {
   render() {
@@ -15,13 +16,10 @@ class Home extends React.Component {
         </p>
         <ul className="Home-resources">
           <li>
-            <a href="https://github.com/jaredpalmer/razzle">Docs</a>
+            <Link to="/">home</Link>
           </li>
           <li>
-            <a href="https://github.com/jaredpalmer/razzle/issues">Issues</a>
-          </li>
-          <li>
-            <a href="https://palmer.chat">Community Slack</a>
+            <Link to="/foo">foo</Link>
           </li>
         </ul>
       </div>
