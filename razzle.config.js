@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 const LoadableWebpackPlugin = require('@loadable/webpack-plugin');
+const makeLoaderFinder = require('razzle-dev-utils/makeLoaderFinder');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // required by razzle
 const path = require('path');
 
 module.exports = {
@@ -28,6 +30,27 @@ module.exports = {
         new LoadableWebpackPlugin({
           outputAsset: false,
           writeToDisk: { filename },
+        })
+      );
+    }
+
+    // use MiniCSSExtractPLugin instead default style-loader just like in prod mode
+    // to avoid no-styled screen the first frame page rendered in dev mode
+    if (target === 'web' && dev) {
+      const styleLoaderFinder = makeLoaderFinder('style-loader');
+
+      // [.css, .s(a|c)ss]
+      const cssRulesList = webpackConfig.module.rules.filter(styleLoaderFinder);
+
+      if (cssRulesList.every(cssRules => cssRules.use.findIndex(styleLoaderFinder) === 0)) {
+        throw new Error(`[Thimble Razzle Plugin] style-loader was not found`);
+      }
+      cssRulesList.forEach(cssrules => cssrules.use.shift()); // remove style loader
+      cssRulesList.forEach(cssrules => cssrules.use.unshift(MiniCssExtractPlugin.loader));
+      webpackConfig.plugins.push(
+        new MiniCssExtractPlugin({
+          filename: `${razzleOptions.cssPrefix}/bundle.[chunkhash:8].css`,
+          chunkFilename: `${razzleOptions.cssPrefix}/[name].[chunkhash:8].chunk.css`,
         })
       );
     }
