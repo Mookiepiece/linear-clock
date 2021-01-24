@@ -1,6 +1,7 @@
 import App from './App';
 import React from 'react';
 import { StaticRouter } from 'react-router-dom';
+import { StaticRouterContext } from 'react-router';
 import Koa from 'koa';
 import serve from 'koa-static';
 import Router from '@koa/router';
@@ -17,9 +18,7 @@ router.get('/(.*)', ctx => {
     entrypoints: ['client'],
   });
 
-  const context: Record<any, any> = {};
-
-  console.log('[ 🤣 ]:', ctx.url, ctx.url.length);
+  const context: StaticRouterContext = {};
 
   const markup = renderToString(
     <ChunkExtractorManager extractor={extractor}>

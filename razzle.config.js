@@ -57,4 +57,52 @@ module.exports = {
 
     return webpackConfig;
   },
+  modifyBabelOptions(defaultBabelOptions, { tagert, dev }) {
+    var env = process.env.BABEL_ENV || process.env.NODE_ENV;
+    if (env !== 'development' && env !== 'test' && env !== 'production') {
+      throw new Error(
+        'Using `babel-preset-razzle` requires that you specify `NODE_ENV` or ' +
+          '`BABEL_ENV` environment variables. Valid values are "development", ' +
+          '"test", and "production". Instead, received: ' +
+          JSON.stringify(env) +
+          '.'
+      );
+    }
+
+    return {
+      ...defaultBabelOptions,
+      presets: [
+        [
+          require.resolve('@babel/preset-env'),
+          {
+            useBuiltIns: 'usage',
+            corejs: 3,
+            modules: false,
+          },
+        ],
+        require.resolve('@babel/preset-react'),
+        require.resolve('@babel/preset-typescript'),
+      ],
+      plugins: [
+        // Add support for async/await
+        require.resolve('@babel/plugin-transform-runtime'),
+
+        '@loadable/babel-plugin',
+      ],
+
+      env: {
+        test: {
+          plugins: [
+            // Compiles import() to a deferred require()
+            require.resolve('babel-plugin-dynamic-import-node'),
+            // Transform ES modules to commonjs for Jest support
+            [require.resolve('@babel/plugin-transform-modules-commonjs'), { loose: true }],
+          ],
+        },
+        production: {
+          plugins: [require.resolve('babel-plugin-transform-react-remove-prop-types')],
+        },
+      },
+    };
+  },
 };
