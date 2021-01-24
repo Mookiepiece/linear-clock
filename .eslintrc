@@ -8,7 +8,7 @@
     "eslint:recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    // "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended",
     "prettier",
     "prettier/@typescript-eslint",
     "prettier/react"
@@ -18,10 +18,12 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "ecmaVersion": 12,
+    "ecmaVersion": 2021,
     "sourceType": "module"
   },
   "plugins": ["react", "@typescript-eslint"],
-  "rules": {},
+  "rules": {
+    "@typescript-eslint/no-var-requires": 0
+  },
   "ignorePatterns": ["src/**/*.test.tsx"]
 }

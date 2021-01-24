@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const LoadableWebpackPlugin = require('@loadable/webpack-plugin');
 const makeLoaderFinder = require('razzle-dev-utils/makeLoaderFinder');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // required by razzle
