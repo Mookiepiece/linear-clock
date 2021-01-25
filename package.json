@@ -9,6 +9,47 @@
     "start:prod": "NODE_ENV=production node build/server.js",
     "lint": "eslint --ext .ts,.tsx,.js src"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --max-warnings 0 "
+    ],
+    "src/**/*.{css,scss}": [
+      "stylelint"
+    ],
+    "src/**/*.{ts,tsx,js,jsx,json,html,yml,css,scss,md}": [
+      "prettier --write"
+    ]
+  },
+  "browserslist": [
+    ">1%",
+    "last 4 versions",
+    "Firefox ESR",
+    "not ie <= 10"
+  ],
+  "stylelint": {
+    "extends": [
+      "stylelint-config-standard",
+      "stylelint-config-rational-order",
+      "stylelint-config-prettier"
+    ],
+    "plugins": [
+      "stylelint-order",
+      "stylelint-declaration-block-no-ignored-properties"
+    ],
+    "ignoreFiles": [
+      "node_modules/**/*",
+      "build/**/*",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.tsx",
+      "**/*.ts"
+    ]
+  },
   "dependencies": {
     "@koa/router": "^10.0.0",
     "@loadable/component": "^5.14.1",
@@ -51,9 +92,18 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.3",
     "prettier": "2.2.1",
     "razzle": "3.3.7",
     "razzle-dev-utils": "^3.3.11",
+    "razzle-plugin-scss": "^3.3.11",
+    "stylelint": "^13.9.0",
+    "stylelint-config-prettier": "^8.0.2",
+    "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-declaration-block-no-ignored-properties": "^2.3.0",
+    "stylelint-order": "^4.1.0",
     "typescript": "^4.1.2"
   }
 }

@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './Foo.css';
+import './Foo.scss';
 
 const Bar = () => <div></div>;
 
-export default function Foo() {
+console.log();
+
+const Foo: React.FC = () => {
   return (
     <div className="foo">
       <div>sadad</div>
@@ -13,4 +15,6 @@ export default function Foo() {
       <Link to="/foo">foo</Link>
     </div>
   );
-}
+};
+
+export default Foo;

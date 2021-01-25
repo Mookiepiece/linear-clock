@@ -1,0 +1,13 @@
+.foo {
+  position: static;
+  font-family: 'Courier New', Courier, monospace;
+  background: powderblue;
+}
+
+$asd: 1; //dsad
+
+@media (min-width: $asd) {
+  .foo {
+    width: calc($asd + 1px);
+  }
+}

@@ -25,7 +25,23 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "@typescript-eslint/no-var-requires": 0
+    "@typescript-eslint/no-var-requires": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
+    "@typescript-eslint/no-explicit-any": 1
   },
-  "ignorePatterns": ["src/**/*.test.tsx"]
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".tsx", ".ts", ".js", ".json"]
+      }
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"]
+    },
+    "import/extensions": [".js", ".mjs", ".jsx", ".ts", ".tsx", ".d.ts"],
+    "react": {
+      "version": "detect"
+    }
+  },
+  "ignorePatterns": ["node_modules/**/*", "build/**/*", "src/**/*.test.tsx"]
 }

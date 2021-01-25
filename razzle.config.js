@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // required by 
 const path = require('path');
 
 module.exports = {
+  plugins: ['scss'],
   modifyWebpackConfig({
     env: {
       target, // the target 'node' or 'web'
