@@ -27,7 +27,8 @@
   "rules": {
     "@typescript-eslint/no-var-requires": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
-    "@typescript-eslint/no-explicit-any": 1
+    "@typescript-eslint/no-explicit-any": 1,
+    "react/prop-types": 0
   },
   "settings": {
     "import/resolver": {

@@ -3,6 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import './App.css';
 import LoadingPage from './components/LoadingPage';
 import loadable from '@loadable/component';
+import 'antd/dist/antd.css';
 
 const LoadableHome = loadable(() => import('./pages/Home'), { fallback: <LoadingPage /> });
 const LoadableFoo = loadable(() => import('./pages/Foo'), { fallback: <LoadingPage /> });

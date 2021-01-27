@@ -3,6 +3,7 @@ const LoadableWebpackPlugin = require('@loadable/webpack-plugin');
 const makeLoaderFinder = require('razzle-dev-utils/makeLoaderFinder');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin'); // required by razzle
 const path = require('path');
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   plugins: ['scss'],
@@ -32,6 +33,7 @@ module.exports = {
           outputAsset: false,
           writeToDisk: { filename },
         })
+        // new BundleAnalyzerPlugin()
       );
     }
 
@@ -70,38 +72,52 @@ module.exports = {
       );
     }
 
+    // tree shaking fallback in ONLY DEVELOPMENT mode https://material-ui.com/zh/guides/minimizing-bundle-size/
+    // don't use in prod because webpack will auto tree shaking
+    const babelPluginImport = [
+      'import',
+      {
+        libraryName: 'antd',
+        libraryDirectory: 'lib', // default: lib
+      },
+    ];
+
     return {
       ...defaultBabelOptions,
       presets: [
         [
-          require.resolve('@babel/preset-env'),
+          '@babel/preset-env',
           {
             useBuiltIns: 'usage',
             corejs: 3,
             modules: false,
           },
         ],
-        require.resolve('@babel/preset-react'),
-        require.resolve('@babel/preset-typescript'),
+        '@babel/preset-react',
+        '@babel/preset-typescript',
       ],
       plugins: [
         // Add support for async/await
-        require.resolve('@babel/plugin-transform-runtime'),
-
+        '@babel/plugin-transform-runtime',
+        // loadable components
         '@loadable/babel-plugin',
       ],
 
       env: {
+        development: {
+          plugins: [babelPluginImport],
+        },
         test: {
           plugins: [
             // Compiles import() to a deferred require()
-            require.resolve('babel-plugin-dynamic-import-node'),
+            'babel-plugin-dynamic-import-node',
             // Transform ES modules to commonjs for Jest support
-            [require.resolve('@babel/plugin-transform-modules-commonjs'), { loose: true }],
+            ['@babel/plugin-transform-modules-commonjs', { loose: true }],
+            babelPluginImport,
           ],
         },
         production: {
-          plugins: [require.resolve('babel-plugin-transform-react-remove-prop-types')],
+          plugins: ['babel-plugin-transform-react-remove-prop-types'],
         },
       },
     };
