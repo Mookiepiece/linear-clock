@@ -1,0 +1,39 @@
+.clock {
+  position: relative;
+  top: 30vh;
+  left: 24px;
+  width: calc(100% - 48px);
+  color: wheat;
+}
+
+.lines-wrap {
+  display: flex;
+  margin-bottom: 12px;
+  font-size: 0;
+  > * {
+    width: 50%;
+  }
+}
+
+.line-wrap {
+  --color-hl: rgba(255, 255, 255, 0.5);
+
+  padding: 8px 0;
+
+  .line {
+    // --clock-color: #ffd900;
+
+    height: 6px;
+    background: linear-gradient(var(--clock-color), var(--clock-color));
+    box-shadow: inset 2px 2px 2px 0 var(--color-hl), 0 2px 2px 0 var(--clock-color);
+  }
+
+  &:not(:first-child) {
+    .line {
+      box-shadow: inset 0 4px 2px -2px var(--color-hl), 0 2px 2px 0 var(--clock-color);
+    }
+  }
+}
+
+// .time-label {
+// }
