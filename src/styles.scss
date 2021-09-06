@@ -6,10 +6,38 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-size: 20px;
   font-family: sans-serif;
+}
+
+:root {
+  --color-hl: #fff;
+  --color-l: #f8f8f8;
+  --color-md: #eee;
+  --color-d: #ccc;
+  --color-hd: #eee;
+  //
+  --color-primary: #fd1;
+  --color-primary-s: #e48d0b;
+  --color-primary-d: #b17215;
+  //
+  --color-violent: #bea4f5;
+  --color-violent-d: #574383;
+  --color-powder: #72b5f5;
+  --color-powder-d: #547ea5;
+  --color-pink: #f59fc4;
+  --color-pink-d: #992859;
 }
 
 #app {
   height: 100%;
-  background: linear-gradient(#080e2b, #080e2b);
+  overflow: hidden;
+  background: var(--color-md);
+}
+
+.color-primary-d {
+  padding: 3px 6px;
+  color: var(--color-hl);
+  font-size: 15px;
+  background: var(--color-primary-d);
 }

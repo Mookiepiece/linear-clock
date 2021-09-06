@@ -1,0 +1,46 @@
+.rail__inner {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 20px;
+  margin: 0 0 30px 0;
+  border: 1px solid var(--color-fill);
+
+  --color-fill: var(--color-d);
+}
+.rail__fill {
+  background: var(--color-fill);
+  box-shadow: 1px 1px 4px 1px var(--color-shadow), 0 0 3px var(--color-hl) inset;
+
+  --color-shadow: #e48d0b;
+  --color-fill: #fd1;
+}
+
+.rail__labels {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  width: 100%;
+}
+
+.rail__label {
+  position: absolute;
+  transform: translateX(-50%);
+
+  &::before {
+    position: absolute;
+    left: 50%;
+    display: block;
+    height: 3px;
+    border-left: 1px solid;
+    transform: translateX(-50%);
+    content: '';
+  }
+  &::after {
+    font-size: 13.2px;
+    content: attr(data-hour);
+  }
+}
+.rail__time-label {
+  margin: 20px 0;
+}

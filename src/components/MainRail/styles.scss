@@ -1,0 +1,38 @@
+.main-rail {
+  position: relative;
+  margin: 0 0 40px;
+  padding: 10px 0;
+  cursor: crosshair;
+  user-select: none;
+
+  .dial {
+    position: absolute;
+    top: 0;
+    box-sizing: border-box;
+    width: 10px;
+    height: 10px;
+    border: 5px solid transparent;
+    border-top-color: var(--color-violent);
+    transform: translate(-50%, 0);
+  }
+  .dial__label {
+    position: relative;
+    top: -40px;
+    left: var(--label-offset);
+    width: 200px;
+    padding: 12px;
+  }
+
+  .startmark,
+  .endmark {
+    position: absolute;
+    top: 0;
+    box-sizing: border-box;
+    width: 10px;
+    height: 10px;
+    border: 5px solid transparent;
+    border-top-color: var(--color-primary-s);
+    transform: translate(-50%, 0);
+    pointer-events: none;
+  }
+}

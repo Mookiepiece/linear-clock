@@ -30,8 +30,9 @@
   },
   "settings": {
     "import/resolver": {
-      "node": {
-        "extensions": [".tsx", ".ts", ".js", ".json"]
+      "alias": {
+        "map": [["@", "./src"]],
+        "extensions": [".ts", ".tsx", ".js", ".jsx", ".json"]
       }
     },
     "import/parsers": {

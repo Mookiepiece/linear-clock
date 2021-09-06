@@ -1,11 +1,7 @@
 import React from 'react';
-import Clock from './pages/Clock/Clock';
+import Clock from './components/Clock/Clock';
 import './styles.scss';
 
-const App: React.FC = () => (
-  <>
-    <Clock />
-  </>
-);
+const App: React.FC = () => <Clock />;
 
 export default App;
