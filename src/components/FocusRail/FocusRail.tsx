@@ -17,6 +17,8 @@ const FocusRail: React.FC = () => {
   return (
     <div className="focus-rail">
       Focusing ({shims.print(startMark)} - {shims.print(endMark)})
+      <br />
+      <br />
       <Rail startTime={startMark} endTime={endMark} />
     </div>
   );

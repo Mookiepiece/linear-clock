@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { computePosition, flip } from '@floating-ui/dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useUnmount } from 'react-use';
 // https://reactjs.org/docs/hooks-faq.html#how-to-read-an-often-changing-value-from-usecallback
 // https://zh-hans.reactjs.org/docs/hooks-faq.html#how-to-read-an-often-changing-value-from-usecallback
@@ -36,7 +37,7 @@ export type Direction = {
   clientRectStart: 'top' | 'left';
 };
 // https://github.com/element-plus/element-plus/blob/a57727bfa41943bc4bf81a2bc31d6895362b5077/packages/scrollbar/src/util.ts#L1
-export const AXIS_MAP = {
+const AXIS_MAP = {
   vertical: {
     offsetSize: 'offsetHeight',
     scrollValue: 'scrollTop',
@@ -56,14 +57,169 @@ export const AXIS_MAP = {
     clientRectStart: 'left',
   } as Direction,
 };
+
+export const useFloat = <T extends HTMLElement = HTMLElement>(
+  mouse: {
+    x: number;
+    y: number;
+  },
+  ref: React.RefObject<T>
+): {
+  x: number;
+  y: number;
+} => {
+  const [position, setPosition] = useState<{
+    x: number;
+    y: number;
+  }>({
+    x: 0,
+    y: 0,
+  });
+
+  useEffect(() => {
+    if (ref.current) {
+      computePosition(
+        {
+          getBoundingClientRect() {
+            return {
+              width: 0,
+              height: 0,
+              x: mouse.x,
+              y: mouse.y,
+              top: mouse.y,
+              left: mouse.x,
+              right: mouse.x,
+              bottom: mouse.y,
+            };
+          },
+        },
+        ref.current,
+        {
+          middleware: [flip()],
+          placement: 'right-start',
+        }
+      ).then(setPosition);
+    }
+  }, [mouse.x, mouse.y, ref, setPosition]);
+
+  return position;
+};
+
+/**
+ * WARNING: Element cannot be conditional
+ */
+export function usePointer<T extends HTMLElement = HTMLElement>(
+  ref: React.RefObject<T>
+): {
+  active: boolean;
+  mouse: {
+    x: number;
+    y: number;
+  };
+} {
+  // const [value, setValue] = useState(false);
+  const [value, setValue] = useState<{
+    active: boolean;
+    mouse: {
+      x: number;
+      y: number;
+    };
+  }>({
+    active: false,
+    mouse: {
+      x: 0,
+      y: 0,
+    },
+  });
+
+  const getPosition = useSafeGetPosition();
+
+  const handlePointerMove = useCallback(
+    (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+      const el = ref.current;
+      if (el) {
+        setValue({ active: true, mouse: getPosition(e) });
+      }
+    },
+    [getPosition, ref]
+  );
+
+  const handlePointerOut = useCallback(
+    (e?: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+      const el = ref.current;
+      if (el) {
+        setValue({
+          active: false,
+          mouse: getPosition(e),
+        });
+        el.removeEventListener('mousemove', handlePointerMove);
+        el.removeEventListener('mouseout', handlePointerOut);
+        document.body.removeEventListener('touchmove', handlePointerMove);
+        document.body.removeEventListener('touchcancel', handlePointerOut);
+        document.body.removeEventListener('touchend', handlePointerOut);
+      }
+    },
+    [getPosition, handlePointerMove, ref]
+  );
+
+  const handleMouseOver = useCallback(
+    (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+      const el = ref.current;
+      if (el) {
+        setValue({ active: true, mouse: getPosition(e) });
+
+        el.addEventListener('mousemove', handlePointerMove);
+        el.addEventListener('mouseout', handlePointerOut);
+        document.body.addEventListener('touchmove', handlePointerMove);
+        document.body.addEventListener('touchend', handlePointerOut);
+        document.body.addEventListener('touchcancel', handlePointerOut);
+      }
+    },
+    [getPosition, handlePointerMove, handlePointerOut, ref]
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) {
+      el.addEventListener('mouseover', handleMouseOver);
+      el.addEventListener('touchstart', handleMouseOver);
+      return () => {
+        el.removeEventListener('mouseover', handleMouseOver);
+        el.removeEventListener('touchstart', handleMouseOver);
+      };
+    }
+  }, [getPosition, handleMouseOver, handlePointerOut, ref]);
+
+  useUnmount(() => {
+    if (value.active) {
+      handlePointerOut();
+    }
+  });
+
+  return value;
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useSlider = ({
   onChange,
+  onEnd,
+  onStart,
   trackMouseEvents = true,
   trackTouchEvents = true,
 }: {
-  // direction: Direction;
-  onChange: (prop: {
+  onChange?: (prop: {
+    mouse: {
+      x: number;
+      y: number;
+    };
+  }) => void;
+  onStart?: (prop: {
+    mouse: {
+      x: number;
+      y: number;
+    };
+  }) => void;
+  onEnd?: (prop: {
     mouse: {
       x: number;
       y: number;
@@ -74,29 +230,49 @@ export const useSlider = ({
 }) => {
   const [active, setActive] = useState(false);
 
+  const lastEventData = useRef<MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent>();
+
   const handleDrag = useEventCallback(
     (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
-      const mouse = position(e);
+      const mouse = getPosition(e);
+
       onChange?.({ mouse });
+      lastEventData.current = e;
     }
   );
 
-  const handleEnd = useEventCallback(() => {
-    setActive(false);
-    document.removeEventListener('mousemove', handleDrag);
-    document.removeEventListener('mouseup', handleEnd);
-    document.removeEventListener('touchmove', handleDrag);
-    document.removeEventListener('touchend', handleEnd);
-    document.removeEventListener('touchcancel', handleEnd);
-  });
+  const handleEnd = useEventCallback(
+    (e?: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+      setActive(false);
+      if (e && canGetPosition(e)) {
+        const mouse = getPosition(e);
+        onEnd?.({ mouse });
+      } else {
+        if (!lastEventData.current) {
+          throw new Error('[Linear Clock] cannot get input position form event');
+        }
+        const mouse = getPosition(lastEventData.current);
+        onEnd?.({ mouse });
+      }
+
+      document.removeEventListener('mousemove', handleDrag);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleDrag);
+      document.removeEventListener('touchend', handleEnd);
+      document.removeEventListener('touchcancel', handleEnd);
+    }
+  );
   const handleStart = useEventCallback((e: React.MouseEvent | React.TouchEvent) => {
-    // middle click and right click won't trigger drag
+    // Middle click and right click won't trigger drag
     if (e.ctrlKey || ('button' in e && [1, 2].includes(e.button))) {
       return;
     }
 
+    const mouse = getPosition(e);
+    lastEventData.current = e;
+    onStart?.({ mouse });
+
     setActive(true);
-    handleDrag(e.nativeEvent);
     if (trackMouseEvents) {
       document.addEventListener('mousemove', handleDrag);
       document.addEventListener('mouseup', handleEnd);
@@ -108,7 +284,12 @@ export const useSlider = ({
     }
   });
 
-  useUnmount(handleEnd); // component could unexpectly unmount during dragging.
+  useUnmount(() => {
+    // component could unexpectly unmount during dragging.
+    if (active) {
+      handleEnd();
+    }
+  });
 
   return {
     active,
@@ -118,7 +299,13 @@ export const useSlider = ({
   };
 };
 
-const position = (
+const canGetPosition = (
+  e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent
+): boolean => {
+  return 'touches' in e ? !!e.touches.length : true;
+};
+
+const getPosition = (
   e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent
 ): {
   x: number;
@@ -127,4 +314,18 @@ const position = (
   return 'touches' in e
     ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
     : { x: e.clientX, y: e.clientY };
+};
+
+const useSafeGetPosition = () => {
+  const lastEventData = useRef<MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent>();
+
+  return useCallback((e?: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
+    if (e && canGetPosition(e)) return getPosition((lastEventData.current = e));
+
+    if (lastEventData.current) {
+      return getPosition(lastEventData.current);
+    }
+
+    throw new Error('getPosition() should be called at least once to enable event cache');
+  }, []);
 };

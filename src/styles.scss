@@ -13,14 +13,16 @@ body {
 :root {
   --color-hl: #fff;
   --color-l: #f8f8f8;
-  --color-md: #eee;
+  --color-md: #ecebe9;
   --color-d: #ccc;
   --color-hd: #eee;
-  //
+
+  // /
   --color-primary: #fd1;
   --color-primary-s: #e48d0b;
   --color-primary-d: #b17215;
-  //
+
+  // /
   --color-violent: #bea4f5;
   --color-violent-d: #574383;
   --color-powder: #72b5f5;
@@ -40,4 +42,35 @@ body {
   color: var(--color-hl);
   font-size: 15px;
   background: var(--color-primary-d);
+}
+
+button {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 20px;
+  color: var(--color-powder-d);
+  font-weight: bold;
+  font-size: 20px;
+  background-color: transparent;
+  border: 2px solid #f1f1f1;
+  border-radius: 2px;
+  outline: 0;
+  transition: all 0.1s;
+
+  &:disabled {
+    text-decoration: line-through #111;
+    border: 2px solid transparent;
+  }
+
+  &:not(:disabled) {
+    &:hover,
+    &:focus-visible {
+      background: #0001;
+      box-shadow: unset;
+    }
+
+    &:active {
+      background: #0002;
+    }
+  }
 }

@@ -1,7 +1,8 @@
 .clock {
   position: relative;
   top: 30vh;
-  left: 24px;
-  width: calc(100% - 48px);
+  width: calc(100% - 60px);
+  padding: 30px;
   color: var(--color-primary-d);
+  box-shadow: -3px -3px 5px 0 #fffa, 3px 3px 5px 0 #0001;
 }

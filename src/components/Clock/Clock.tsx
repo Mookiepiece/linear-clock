@@ -1,37 +1,40 @@
+import { Storages } from '@/storages';
+import { useStorage } from '@/utils/versionedStorage';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import shims from '../../utils/shims';
+import DaySettings from '../DaySettings';
 import FocusRail from '../FocusRail/FocusRail';
 import MainRail from '../MainRail';
 import { ClockContext, ClockFnContext } from './exports';
 import './styles.scss';
 
-const ours = (
-  h: string | number = 0,
-  m: string | number = 0,
-  s: string | number = 0,
-  ms: string | number = 0
-) => {
-  const t = new Date();
-  t.setHours(+h, +m, +s, +ms);
-  return t.getTime();
-};
+const Clock: React.FC = () => {
+  const [{ day_end, day_start }, setLocalStorage] = useStorage(Storages.lc_local);
 
-const Clock = () => {
-  const [dayStart, setDayStart] = useState(() => {
-    const today0800 = new Date();
-    today0800.setHours(8, 0, 0, 0);
-    return today0800.getTime();
-  });
-  const [dayEnd, setDayEnd] = useState(() => {
-    const today2230 = new Date();
-    today2230.setHours(22, 30, 0, 0);
-    return today2230.getTime();
-  });
-
-  const [time, setTime] = useState(() => new Date());
+  const [dayStart, setDayStart] = useState(day_start);
+  const [dayEnd, setDayEnd] = useState(day_end);
 
   useEffect(() => {
-    const i = setInterval(() => setTime(() => new Date()), 1000);
+    setLocalStorage({
+      day_start: dayStart,
+      day_end: dayEnd,
+    });
+  }, [dayStart, dayEnd, setLocalStorage]);
+
+  const [time, setTime] = useState(() => new Date(0));
+
+  useEffect(() => {
+    const i = setInterval(
+      () =>
+        setTime(
+          () =>
+            new Date(
+              ((new Date().getTime() + 1000 * 60 * 60 * 8) % (1000 * 60 * 60 * 24)) -
+                1000 * 60 * 60 * 8
+            )
+        ),
+      1000
+    );
     return () => clearInterval(i);
   }, []);
   const now = time.getTime();
@@ -80,8 +83,15 @@ const Clock = () => {
               paddingTop: 16,
             }}
           >
-            <input type="time" onChange={e => setDayStart(ours(...e.target.value.split(':')))} />
-            <input type="time" onChange={e => setDayEnd(ours(...e.target.value.split(':')))} />
+            <DaySettings
+              initialValue={[dayStart, dayEnd]}
+              onChange={useCallback(([ds, de]) => {
+                setDayStart(ds);
+                setDayEnd(de);
+              }, [])}
+            />
+            {/* <input type="time" onChange={e => setDayStart(ours(...e.target.value.split(':')))} /> */}
+            {/* <input type="time" onChange={e => setDayEnd(ours(...e.target.value.split(':')))} /> */}
           </div>
           <FocusRail />
         </ClockFnContext.Provider>

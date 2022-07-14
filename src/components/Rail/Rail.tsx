@@ -37,6 +37,14 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
             } as React.CSSProperties
           }
         ></div>
+        <div
+          className="rail__fill2"
+          style={
+            {
+              width: `${100 - activePercentage}%`,
+            } as React.CSSProperties
+          }
+        ></div>
       </div>
       <div className="time-label">
         {shims.print(now, 'HMS')}{' '}
