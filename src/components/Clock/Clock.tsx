@@ -90,8 +90,6 @@ const Clock: React.FC = () => {
                 setDayEnd(de);
               }, [])}
             />
-            {/* <input type="time" onChange={e => setDayStart(ours(...e.target.value.split(':')))} /> */}
-            {/* <input type="time" onChange={e => setDayEnd(ours(...e.target.value.split(':')))} /> */}
           </div>
           <FocusRail />
         </ClockFnContext.Provider>

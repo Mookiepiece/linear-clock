@@ -1,3 +1,4 @@
+import { Text } from '@/primitives';
 import shims from '@/utils/shims';
 import React, { useContext } from 'react';
 import { ClockContext } from '../Clock/exports';
@@ -47,8 +48,9 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
         ></div>
       </div>
       <div className="time-label">
-        {shims.print(now, 'HMS')}{' '}
-        <span className="color-primary-d">({shims.round2(100 - activePercentage)}%)</span>
+        <Text>
+          {shims.print(now, 'HMS')} <Text solid>({shims.round2(100 - activePercentage)}%)</Text>
+        </Text>
       </div>
     </div>
   );

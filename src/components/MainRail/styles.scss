@@ -5,7 +5,7 @@
   cursor: crosshair;
   user-select: none;
 
-  .dial {
+  .hand {
     position: absolute;
     top: 0;
     box-sizing: border-box;
@@ -16,12 +16,18 @@
     transform: translate(-50%, 0);
   }
 
-  .dial__label {
-    position: relative;
-    top: -40px;
-    left: var(--label-offset);
-    width: 200px;
-    padding: 12px;
+  .hand__label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    padding: 10px;
+    background: radial-gradient(#ffffff0a 30%, #00000006);
+    border-right: 1px solid #fff;
+    border-left: 2px solid #fff;
+    transition: opacity 0.2s;
+    user-select: none;
+    pointer-events: none;
   }
 
   .startmark,

@@ -1,0 +1,16 @@
+.lc-text {
+  --color-theme: var(--color-primary-d);
+
+  color: var(--color-theme);
+
+  &.lc-text--color-pink {
+    --color-theme: var(--color-pink-d);
+  }
+
+  &.lc-text--solid {
+    padding: 3px 6px;
+    color: var(--color-hl);
+    font-size: 15px;
+    background: var(--color-theme);
+  }
+}

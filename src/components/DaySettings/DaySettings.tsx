@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useMount, useMouse, useToggle } from 'react-use';
+import React, { useCallback, useRef, useState } from 'react';
+import { useMouse, useToggle } from 'react-use';
 import clsx from 'clsx';
 import './styles.scss';
 import shims from '@/utils/shims';
 import { usePointer, useSlider } from '@/hooks/useSlider';
-import { computePosition, flip } from '@floating-ui/dom';
 import { Portal } from '@/utils/Portal';
 import { Transition } from '@headlessui/react';
+import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 
 const radius2timestamp = (r: number) => {
   return (r / 360) * (1000 * 60 * 60 * 24) - 1000 * 60 * 60 * 8;
@@ -334,46 +334,13 @@ const FloatingLabel: React.FC<{
 }> = ({ mouse, visible, mouseRadius }) => {
   const labelElRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const labelEl = labelElRef.current;
-    if (labelEl) {
-      if (!visible) {
-        labelEl.style.opacity = `0`;
-        return;
-      }
-      computePosition(
-        {
-          getBoundingClientRect() {
-            return {
-              width: 0,
-              height: 0,
-              x: mouse.x,
-              y: mouse.y,
-              top: mouse.y,
-              left: mouse.x,
-              right: mouse.x,
-              bottom: mouse.y,
-            };
-          },
-        },
-        labelEl,
-        {
-          middleware: [flip()],
-          placement: 'right-start',
-        }
-      ).then(({ x, y }) => {
-        labelEl.style.opacity = '1';
-        labelEl.style.transform = `translate(${x}px,${y}px)`;
-      });
-    }
-  }, [mouse.x, mouse.y, visible, labelElRef]);
+  useFloatingTransform(mouse, labelElRef, {
+    active: visible,
+  });
 
   return (
-    <div className="day-settings__control__label" ref={labelElRef} aria-hidden>
-      <div>
-        {'📏 '}
-        {shims.print(radius2timestamp(mouseRadius))}
-      </div>
+    <div className="day-settings__control__label" ref={labelElRef}>
+      {shims.print(radius2timestamp(mouseRadius))}
     </div>
   );
 };
