@@ -103,14 +103,14 @@ const HandFloatingLabel: React.FC<{
 
   return (
     <>
-      <div
+      {/* <div
         className="hand"
         style={{
           opacity: hovering ? '1' : '0',
-          left: `${mousePercentage}%`,
+          transform: `translate(${mouse.x - left - 5}px)`,
           transition: 'opacity .1s',
         }}
-      ></div>
+      ></div> */}
       <div className="hand__label" ref={labelElRef}>
         <Text color="pink">
           {shims.print(point2time(mousePercentage))}{' '}

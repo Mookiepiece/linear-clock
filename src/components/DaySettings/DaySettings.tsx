@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useMouse, useToggle } from 'react-use';
+import { useToggle } from 'react-use';
 import clsx from 'clsx';
 import './styles.scss';
 import shims from '@/utils/shims';
-import { usePointer, useSlider } from '@/hooks/useSlider';
+import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
 import { Portal } from '@/utils/Portal';
 import { Transition } from '@headlessui/react';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
@@ -97,10 +97,14 @@ const DaySettingsPopper = React.forwardRef<
     [left, top]
   );
 
-  const { elX, elY } = useMouse(circleRef);
+  const [mouse, setMouse] = useState({
+    x: 0,
+    y: 0,
+  });
+  usePointerX(circleRef, setMouse);
 
-  const mouse = { x: elX + left, y: elY + top };
-  const { active: hovering } = usePointer(circleRef);
+  const [hovering, setHovering] = useState(false);
+  useHover(circleRef, setHovering);
 
   const r = (width ?? 200) / 2;
 
@@ -336,11 +340,14 @@ const FloatingLabel: React.FC<{
 
   useFloatingTransform(mouse, labelElRef, {
     active: visible,
+    placement: 'top-start',
   });
 
   return (
     <div className="day-settings__control__label" ref={labelElRef}>
-      {shims.print(radius2timestamp(mouseRadius))}
+      <div className="day-settings__control__label__content">
+        {shims.print(radius2timestamp(mouseRadius))}
+      </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@
   padding: 10px 0;
   cursor: crosshair;
   user-select: none;
+  touch-action: none;
 
   .hand {
     position: absolute;
@@ -13,7 +14,6 @@
     height: 10px;
     border: 5px solid transparent;
     border-top-color: var(--color-violent);
-    transform: translate(-50%, 0);
   }
 
   .hand__label {

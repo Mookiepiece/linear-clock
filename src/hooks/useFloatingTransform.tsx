@@ -31,12 +31,12 @@ export const useFloatingTransform = <T extends HTMLDivElement | null>(
             return {
               width: 0,
               height: 0,
-              x: position.x + 5,
-              y: position.y + 5,
-              top: position.y + 5,
-              left: position.x + 5,
-              right: position.x + 5,
-              bottom: position.y + 5,
+              x: position.x,
+              y: position.y,
+              top: position.y,
+              left: position.x,
+              right: position.x,
+              bottom: position.y,
             };
           },
         },

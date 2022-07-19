@@ -25,7 +25,6 @@ export const useResizeObserver = <T extends HTMLElement | SVGElement>(
     if (!el) return;
     const observer = new ResizeObserver(() => {
       const { top, left, width, height, right, bottom } = el.getBoundingClientRect();
-      console.log(top, left, width);
       setState({ top, left, width, height, right, bottom });
     });
 

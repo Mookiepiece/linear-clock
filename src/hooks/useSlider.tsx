@@ -105,6 +105,84 @@ export const useFloat = <T extends HTMLElement = HTMLElement>(
   return position;
 };
 
+export const useHover = <T extends HTMLElement = HTMLElement>(
+  ref: React.RefObject<T>,
+  _setHovering: (hovering: boolean) => void
+): void => {
+  // const [hovering, setHovering] = useState<boolean>(false);
+
+  const setHovering = useEventCallback(_setHovering);
+
+  const handlePointerOut = useCallback(() => {
+    const el = ref.current;
+    if (el) {
+      setHovering(false);
+      el.removeEventListener('mouseout', handlePointerOut);
+      document.removeEventListener('touchcancel', handlePointerOut);
+      document.removeEventListener('touchend', handlePointerOut);
+    }
+  }, [ref, setHovering]);
+
+  const handleMouseOver = useCallback(() => {
+    const el = ref.current;
+    if (el) {
+      setHovering(true);
+
+      el.addEventListener('mouseout', handlePointerOut);
+      document.addEventListener('touchend', handlePointerOut);
+      document.addEventListener('touchcancel', handlePointerOut);
+    }
+  }, [handlePointerOut, ref, setHovering]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (el) {
+      el.addEventListener('mouseover', handleMouseOver);
+      el.addEventListener('touchstart', handleMouseOver);
+      return () => {
+        el.removeEventListener('mouseover', handleMouseOver);
+        el.removeEventListener('touchstart', handleMouseOver);
+      };
+    }
+  }, [handleMouseOver, handlePointerOut, ref]);
+};
+
+/**
+ * WARNING: Element cannot be conditional
+ */
+export const usePointerX = <T extends HTMLElement = HTMLElement>(
+  ref: React.RefObject<T>,
+  onUpdate: (mouse: { x: number; y: number }) => void
+): void => {
+  const setValue = useEventCallback(onUpdate);
+
+  const getPosition = useSafeGetPosition();
+
+  useEffect(() => {
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      const el = ref.current;
+      if (el) {
+        setValue(getPosition(e));
+      }
+    };
+
+    document.addEventListener('mousemove', handlePointerMove);
+    document.addEventListener('touchstart', handlePointerMove);
+    document.addEventListener('touchmove', handlePointerMove);
+    document.addEventListener('touchend', handlePointerMove);
+    document.addEventListener('touchcancel', handlePointerMove);
+
+    return () => {
+      // setValue(getPosition());
+      document.removeEventListener('mousemove', handlePointerMove);
+      document.removeEventListener('touchstart', handlePointerMove);
+      document.removeEventListener('touchmove', handlePointerMove);
+      document.removeEventListener('touchend', handlePointerMove);
+      document.removeEventListener('touchcancel', handlePointerMove);
+    };
+  });
+};
+
 /**
  * WARNING: Element cannot be conditional
  */
@@ -154,9 +232,9 @@ export function usePointer<T extends HTMLElement = HTMLElement>(
         });
         el.removeEventListener('mousemove', handlePointerMove);
         el.removeEventListener('mouseout', handlePointerOut);
-        document.body.removeEventListener('touchmove', handlePointerMove);
-        document.body.removeEventListener('touchcancel', handlePointerOut);
-        document.body.removeEventListener('touchend', handlePointerOut);
+        document.removeEventListener('touchmove', handlePointerMove);
+        document.removeEventListener('touchcancel', handlePointerOut);
+        document.removeEventListener('touchend', handlePointerOut);
       }
     },
     [getPosition, handlePointerMove, ref]
@@ -170,9 +248,9 @@ export function usePointer<T extends HTMLElement = HTMLElement>(
 
         el.addEventListener('mousemove', handlePointerMove);
         el.addEventListener('mouseout', handlePointerOut);
-        document.body.addEventListener('touchmove', handlePointerMove);
-        document.body.addEventListener('touchend', handlePointerOut);
-        document.body.addEventListener('touchcancel', handlePointerOut);
+        document.addEventListener('touchmove', handlePointerMove);
+        document.addEventListener('touchend', handlePointerOut);
+        document.addEventListener('touchcancel', handlePointerOut);
       }
     },
     [getPosition, handlePointerMove, handlePointerOut, ref]
@@ -230,14 +308,22 @@ export const useSlider = ({
 }) => {
   const [active, setActive] = useState(false);
 
-  const lastEventData = useRef<MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent>();
+  // stores last pointer position because `touchend` event has empty `touches` array
+  // We'll store the position instead of the event itself to avoid get this warning (React version <= 16):
+  // ---
+  // react-dom.development.js:88
+  // Warning: This synthetic event is reused for performance reasons.
+  // If you're seeing this, you're accessing the property `touches` on a released/nullified synthetic event.
+  // This is set to null. If you must keep the original synthetic event around, use event.persist().
+  // See https://fb.me/react-event-pooling for more information
+  const lastEventData = useRef<{ x: number; y: number }>();
 
   const handleDrag = useEventCallback(
     (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
       const mouse = getPosition(e);
 
       onChange?.({ mouse });
-      lastEventData.current = e;
+      lastEventData.current = mouse;
     }
   );
 
@@ -251,7 +337,7 @@ export const useSlider = ({
         if (!lastEventData.current) {
           throw new Error('[Linear Clock] cannot get input position form event');
         }
-        const mouse = getPosition(lastEventData.current);
+        const mouse = lastEventData.current;
         onEnd?.({ mouse });
       }
 
@@ -269,7 +355,7 @@ export const useSlider = ({
     }
 
     const mouse = getPosition(e);
-    lastEventData.current = e;
+    lastEventData.current = mouse;
     onStart?.({ mouse });
 
     setActive(true);
@@ -316,14 +402,23 @@ const getPosition = (
     : { x: e.clientX, y: e.clientY };
 };
 
+// todo: Update useSlider
+// stores last pointer position because `touchend` event has empty `touches` array
+// We'll store the position instead of the event itself to avoid get this warning (React version <= 16):
+// ---
+// react-dom.development.js:88
+// Warning: This synthetic event is reused for performance reasons.
+// If you're seeing this, you're accessing the property `touches` on a released/nullified synthetic event.
+// This is set to null. If you must keep the original synthetic event around, use event.persist().
+// See https://fb.me/react-event-pooling for more information
 const useSafeGetPosition = () => {
-  const lastEventData = useRef<MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent>();
+  const lastEventData = useRef<{ x: number; y: number }>();
 
   return useCallback((e?: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
-    if (e && canGetPosition(e)) return getPosition((lastEventData.current = e));
+    if (e && canGetPosition(e)) return (lastEventData.current = getPosition(e));
 
     if (lastEventData.current) {
-      return getPosition(lastEventData.current);
+      return lastEventData.current;
     }
 
     throw new Error('getPosition() should be called at least once to enable event cache');

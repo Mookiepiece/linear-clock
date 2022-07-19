@@ -63,6 +63,7 @@
   height: 75%;
   cursor: crosshair;
   clip-path: circle(50%);
+  touch-action: none;
 }
 
 .day-settings__control__panel-drop-shadow {
@@ -87,6 +88,7 @@
   border-radius: 50%;
   box-shadow: -3px -3px 5px 0 #fffa, 3px 3px 5px 0 #0001;
   transform: translate(-50%, -50%);
+  touch-action: none;
 }
 
 .day-settings__control__label {
@@ -94,14 +96,18 @@
   top: 0;
   left: 0;
   z-index: 1;
+  padding: 50px 0;
+  transition: opacity 0.2s;
+  user-select: none;
+  pointer-events: none;
+}
+
+.day-settings__control__label__content {
   padding: 10px 30px;
   color: var(--color-pink-d);
   background: radial-gradient(#ffffff0a 30%, #00000006);
   border-right: 1px solid #fff;
   border-left: 2px solid #fff;
-  transition: opacity 0.2s;
-  user-select: none;
-  pointer-events: none;
 }
 
 .day-settings__control__panel {
