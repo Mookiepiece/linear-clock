@@ -115,7 +115,7 @@ const HandFloatingLabel: React.FC<{
         <Text color="pink">
           {shims.print(point2time(mousePercentage))}{' '}
           <Text color="pink" solid>
-            ({restMousePercentage}%)
+            {restMousePercentage}%
           </Text>
         </Text>
       </div>

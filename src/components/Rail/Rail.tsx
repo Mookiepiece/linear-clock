@@ -49,7 +49,7 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
       </div>
       <div className="time-label">
         <Text>
-          {shims.print(now, 'HMS')} <Text solid>({shims.round2(100 - activePercentage)}%)</Text>
+          {shims.print(now, 'HMS')} <Text solid>{shims.round2(100 - activePercentage)}%</Text>
         </Text>
       </div>
     </div>
