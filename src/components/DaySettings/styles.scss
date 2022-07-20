@@ -33,13 +33,9 @@
 
 .day-settings__footer {
   display: flex;
+  gap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 0 50px;
-
-  div {
-    padding: 10px;
-  }
 }
 
 .day-settings__control {
@@ -134,8 +130,8 @@
     &::before {
       position: relative;
       display: block;
-      width: 4px;
-      height: 4px;
+      width: calc(var(--control-width) / 200);
+      height: calc(var(--control-width) / 200);
       background: currentcolor;
       border-radius: 50%;
       transform: translate(-50%, -50%) rotate(var(--label-offset-radius));
@@ -149,7 +145,7 @@
       width: 50px;
       height: 20px;
       color: currentcolor;
-      font-size: calc(var(--control-width) / 30);
+      font-size: calc(var(--control-width) / 40 + 5px);
       line-height: 20px;
       text-align: center;
       transform: translate(-50%, -50%);

@@ -17,6 +17,7 @@
     "last 2 versions"
   ],
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@floating-ui/dom": "^0.5.4",
     "@floating-ui/react-dom": "^0.7.2",
     "@headlessui/react": "^1.6.6",

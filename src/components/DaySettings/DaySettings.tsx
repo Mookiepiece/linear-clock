@@ -7,6 +7,7 @@ import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
 import { Portal } from '@/utils/Portal';
 import { Transition } from '@headlessui/react';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
+import { CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
 
 const radius2timestamp = (r: number) => {
   return (r / 360) * (1000 * 60 * 60 * 24) - 1000 * 60 * 60 * 8;
@@ -48,7 +49,9 @@ const DaySettings: React.FC<{
 
   return (
     <div>
-      <button onClick={toggleExpanded}>⚙️</button>
+      <button onClick={toggleExpanded}>
+        <CompassOutlined />
+      </button>
       <Portal>
         <Transition
           appear
@@ -307,12 +310,13 @@ const DaySettingsPopper = React.forwardRef<
       </div>
       <div className="day-settings__footer">
         <div>
-          <button onClick={onClose}>⬅️</button>
+          <button onClick={onClose}>
+            <CloseOutlined />
+          </button>
         </div>
         <div>
-          {'⏱️ '}
           {shims.print(radius2timestamp(arcStartRadius))}
-          {'->'}
+          {' ~ '}
           {shims.print(radius2timestamp(visualArcEndRadius))}
         </div>
         <div>
@@ -323,7 +327,7 @@ const DaySettingsPopper = React.forwardRef<
               onClose();
             }}
           >
-            🆗
+            <CheckOutlined />
           </button>
         </div>
       </div>
