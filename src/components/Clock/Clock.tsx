@@ -1,5 +1,5 @@
 import { Storages } from '@/storages';
-import { useStorage } from '@/utils/versionedStorage';
+import { useStorage } from '@mookiepiece/strawberry-farm/shared';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import shims from '../../utils/shims';
 import DaySettings from '../DaySettings';
@@ -9,17 +9,7 @@ import { ClockContext, ClockFnContext } from './exports';
 import './styles.scss';
 
 const Clock: React.FC = () => {
-  const [{ day_end, day_start }, setLocalStorage] = useStorage(Storages.lc_local);
-
-  const [dayStart, setDayStart] = useState(day_start);
-  const [dayEnd, setDayEnd] = useState(day_end);
-
-  useEffect(() => {
-    setLocalStorage({
-      day_start: dayStart,
-      day_end: dayEnd,
-    });
-  }, [dayStart, dayEnd, setLocalStorage]);
+  const [{ dayStart, dayEnd }] = useStorage(Storages.lc_local);
 
   const [time, setTime] = useState(() => new Date(0));
 
@@ -83,13 +73,7 @@ const Clock: React.FC = () => {
               paddingTop: 16,
             }}
           >
-            <DaySettings
-              initialValue={[dayStart, dayEnd]}
-              onChange={useCallback(([ds, de]) => {
-                setDayStart(ds);
-                setDayEnd(de);
-              }, [])}
-            />
+            <DaySettings initialValue={[dayStart, dayEnd]} />
           </div>
           <FocusRail />
         </ClockFnContext.Provider>

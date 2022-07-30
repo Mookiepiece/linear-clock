@@ -5,6 +5,7 @@ import './styles.scss';
 type TextProps = {
   color?: 'pink';
   solid?: boolean;
+  children: React.ReactNode;
 };
 
 const Text: React.FC<TextProps> = ({ children, color, solid }) => {

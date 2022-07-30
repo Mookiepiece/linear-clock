@@ -1,13 +1,15 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useToggle } from 'react-use';
 import clsx from 'clsx';
+import { Box, Popper } from '@mookiepiece/strawberry-farm';
+import { Portal, useStorage } from '@mookiepiece/strawberry-farm/shared';
+import { Transition } from '@headlessui/react';
+import { ApiOutlined, CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
 import './styles.scss';
 import shims from '@/utils/shims';
 import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
-import { Portal } from '@/utils/Portal';
-import { Transition } from '@headlessui/react';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
-import { CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
+import { Storages } from '@/storages';
 
 const radius2timestamp = (r: number) => {
   return (r / 360) * (1000 * 60 * 60 * 24) - 1000 * 60 * 60 * 8;
@@ -15,7 +17,6 @@ const radius2timestamp = (r: number) => {
 
 const timestamp2radius = (t: number) => {
   return ((t + 1000 * 60 * 60 * 8) / (1000 * 60 * 60 * 24)) * 360;
-  // return (t / 360) * (1000 * 60 * 60 * 24) ;
 };
 
 const oClockLabelNodes = [...Array(24).keys()].map(i => {
@@ -25,9 +26,9 @@ const oClockLabelNodes = [...Array(24).keys()].map(i => {
     <span
       key={i}
       style={{
-        color: '#111',
-        top: Math.sin(pinia) * 46 + 50 + '%',
-        left: Math.cos(pinia) * 46 + 50 + '%',
+        color: '#444',
+        top: Math.sin(pinia) * 42 + 50 + '%',
+        left: Math.cos(pinia) * 42 + 50 + '%',
         ...{
           '--label-offset-radius': radius + 'deg',
           '--label-offset-radius-r': -radius + 'deg',
@@ -40,11 +41,17 @@ const oClockLabelNodes = [...Array(24).keys()].map(i => {
   );
 });
 
+const onChange = ([dayStart, dayEnd]: [number, number]) =>
+  Storages.lc_local.set(s => ({
+    ...s,
+    dayEnd,
+    dayStart,
+  }));
+
 const DaySettings: React.FC<{
   initialValue: [number, number];
-  onChange(value: [number, number]): void;
   // eslint-disable-next-line react/display-name
-}> = React.memo(({ initialValue, onChange }) => {
+}> = React.memo(({ initialValue }) => {
   const [expanded, toggleExpanded] = useToggle(false);
 
   return (
@@ -91,6 +98,27 @@ const DaySettingsPopper = React.forwardRef<
   const circleRef = useRef<HTMLDivElement | null>(null);
   const { top = 0, left = 0, width = 0 } = circleRef.current?.getBoundingClientRect() ?? {};
 
+  const [{ snapping }] = useStorage(Storages.lc_local);
+
+  const radius2timestampMagneted = useCallback(
+    (r: number) => {
+      const raw = radius2timestamp(r);
+      if (snapping === 0) return raw;
+
+      const step = 1000 * 60 * snapping;
+      const magneted = Math.round(raw / step) * step;
+      return magneted;
+    },
+    [snapping]
+  );
+  const getMagnetedRadius = useCallback(
+    (r: number) => {
+      if (snapping === 0) return r;
+      return timestamp2radius(radius2timestampMagneted(r));
+    },
+    [radius2timestampMagneted, snapping]
+  );
+
   const relativeToCircle = useCallback(
     (mouse: { x: number; y: number }) => {
       const x = mouse.x - left;
@@ -111,12 +139,13 @@ const DaySettingsPopper = React.forwardRef<
 
   const r = (width ?? 200) / 2;
 
-  const mouseRadius =
+  const mouseRadius = getMagnetedRadius(
     (270 -
       (Math.atan2(r - (relativeToCircle(mouse).y ?? 0), (relativeToCircle(mouse).x ?? 0) - r) *
         180) /
         Math.PI) %
-    360;
+      360
+  );
 
   const [arcStartRadius, setArcStartRadius] = useState(() => timestamp2radius(initialValue[0]));
   const [arcEndRadius, setArcEndRadius] = useState(() => timestamp2radius(initialValue[1]));
@@ -124,19 +153,23 @@ const DaySettingsPopper = React.forwardRef<
   const setArcStart = useCallback(
     (arcStart: { x: number; y: number }) => {
       setArcStartRadius(
-        (270 - (Math.atan2(r - (arcStart?.y ?? 0), (arcStart?.x ?? 0) - r) * 180) / Math.PI) % 360
+        getMagnetedRadius(
+          (270 - (Math.atan2(r - (arcStart?.y ?? 0), (arcStart?.x ?? 0) - r) * 180) / Math.PI) % 360
+        )
       );
     },
-    [r]
+    [getMagnetedRadius, r]
   );
 
   const setArcEnd = useCallback(
     (arcEnd: { x: number; y: number }) => {
       setArcEndRadius(
-        (270 - (Math.atan2(r - (arcEnd?.y ?? 0), (arcEnd?.x ?? 0) - r) * 180) / Math.PI) % 360
+        getMagnetedRadius(
+          (270 - (Math.atan2(r - (arcEnd?.y ?? 0), (arcEnd?.x ?? 0) - r) * 180) / Math.PI) % 360
+        )
       );
     },
-    [r]
+    [getMagnetedRadius, r]
   );
 
   const { active, handleStart } = useSlider({
@@ -186,8 +219,8 @@ const DaySettingsPopper = React.forwardRef<
         <div className="day-settings__control__panel">{oClockLabelNodes}</div>
         <FloatingLabel
           mouse={mouse}
-          mouseRadius={mouseRadius}
           visible={startHandleDragActive || endHandleDragActive || active || hovering}
+          label={shims.print(radius2timestamp(mouseRadius))}
         />
         <div
           ref={circleRef}
@@ -211,20 +244,40 @@ const DaySettingsPopper = React.forwardRef<
               <stop offset="100%" style={{ color: '#39f', stopColor: 'currentColor' }} />
             </linearGradient>
             {(() => {
-              const r3 = width / 2.04;
-              const r4 = width / 50;
+              /**
+               * ```txt
+               * ---------------------
+               * Total Width
+               *
+               *             Transparent ring
+               * ----------|----------
+               * Colorful ring (Stroke)
+               *
+               * Middle of colorful ring
+               * |----|----|
+               *      |--------------|
+               *            svg.r
+               * |---------|
+               * svg.stoke
+               * ```
+               */
+              const transparentR = width / 2.2;
+              const COLORFUL_R = width / 2 - transparentR;
+              const R3 = transparentR + COLORFUL_R / 2;
+              const R4 = COLORFUL_R;
+
               return (
                 <>
                   <circle
                     id="bar"
-                    r={r3}
+                    r={R3}
                     cx="50%"
                     cy="50%"
                     fill="transparent"
-                    strokeWidth={r4}
+                    strokeWidth={R4}
                     stroke={rotationBetween === 0 ? 'transparent' : 'url(#gradient)'}
-                    strokeDasharray={r3 * 2 * Math.PI}
-                    strokeDashoffset={(1 - rotationBetween / 360) * r3 * 2 * Math.PI}
+                    strokeDasharray={R3 * 2 * Math.PI}
+                    strokeDashoffset={(1 - rotationBetween / 360) * R3 * 2 * Math.PI}
                     style={{
                       transform: `rotate(${arcStartRadius + 90}deg)`,
                       transformOrigin: 'center',
@@ -309,37 +362,85 @@ const DaySettingsPopper = React.forwardRef<
         ></div>
       </div>
       <div className="day-settings__footer">
-        <div>
-          <button onClick={onClose}>
-            <CloseOutlined />
-          </button>
-        </div>
-        <div>
-          {shims.print(radius2timestamp(arcStartRadius))}
-          {' ~ '}
-          {shims.print(radius2timestamp(visualArcEndRadius))}
-        </div>
-        <div>
-          <button
-            disabled={rotationBetween === 0}
-            onClick={() => {
-              onChange([radius2timestamp(arcStartRadius), radius2timestamp(visualArcEndRadius)]);
-              onClose();
-            }}
-          >
-            <CheckOutlined />
-          </button>
-        </div>
+        <SnappingControl />
+        <Box gap={10} horizontal>
+          <div>
+            <button onClick={onClose}>
+              <CloseOutlined />
+            </button>
+          </div>
+          <Box align="center" justify="center">
+            {shims.print(radius2timestamp(arcStartRadius))}
+            {' ~ '}
+            {shims.print(radius2timestamp(visualArcEndRadius))}
+          </Box>
+          <div>
+            <button
+              disabled={rotationBetween === 0}
+              onClick={() => {
+                onChange([radius2timestamp(arcStartRadius), radius2timestamp(visualArcEndRadius)]);
+                onClose();
+              }}
+            >
+              <CheckOutlined />
+            </button>
+          </div>
+        </Box>
       </div>
     </div>
   );
 });
 
+const SnappingControl: React.FC = () => {
+  const [{ snapping }, setConfig] = useStorage(Storages.lc_local);
+  const setSnapping = useCallback(
+    (snapping: number) => setConfig(s => ({ ...s, snapping })),
+    [setConfig]
+  );
+  const [expanded, toggleExpanded] = useToggle(false);
+
+  return (
+    <Box>
+      <Popper
+        popupClassName="sf-popper--default"
+        placement="top"
+        popup={
+          <div>
+            <Box horizontal align="center">
+              {[0, 5, 10, 15].map(s => (
+                <button
+                  key={s}
+                  className={clsx({ active: snapping === s })}
+                  onClick={() => {
+                    setSnapping(s);
+                    toggleExpanded();
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </Box>
+          </div>
+        }
+        visible={expanded}
+        onClose={toggleExpanded}
+      >
+        <button onClick={toggleExpanded}>
+          <ApiOutlined />
+          <span style={{ position: 'absolute', right: 5, bottom: 5, fontSize: 12 }}>
+            {snapping || ''}
+          </span>
+        </button>
+      </Popper>
+    </Box>
+  );
+};
+
 const FloatingLabel: React.FC<{
   visible: boolean;
   mouse: { x: number; y: number };
-  mouseRadius: number;
-}> = ({ mouse, visible, mouseRadius }) => {
+  label: string;
+}> = ({ mouse, visible, label }) => {
   const labelElRef = useRef<HTMLDivElement | null>(null);
 
   useFloatingTransform(mouse, labelElRef, {
@@ -349,9 +450,7 @@ const FloatingLabel: React.FC<{
 
   return (
     <div className="day-settings__control__label" ref={labelElRef}>
-      <div className="day-settings__control__label__content">
-        {shims.print(radius2timestamp(mouseRadius))}
-      </div>
+      <div className="day-settings__control__label__content">{label}</div>
     </div>
   );
 };

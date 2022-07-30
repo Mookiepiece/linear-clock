@@ -49,7 +49,7 @@ const MainRail: React.FC = () => {
     if (focusStart && focusEnd && focusStart < focusEnd) {
       MainRailMitt.emit('MARK', [focusStart, focusEnd]);
     } else {
-      MainRailMitt.emit('UNMARK', undefined);
+      MainRailMitt.emit('UNMARK');
     }
   }, [focusStart, focusEnd]);
 

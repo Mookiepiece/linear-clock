@@ -31,6 +31,7 @@
 
 .day-settings__footer {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   align-items: center;
   justify-content: center;
@@ -152,7 +153,7 @@
       width: 50px;
       height: 20px;
       color: currentcolor;
-      font-size: calc(var(--control-width) / 40 + 5px);
+      font-size: calc(var(--control-width) / 30 + 5px);
       line-height: 20px;
       text-align: center;
       transform: translate(-50%, -50%);
