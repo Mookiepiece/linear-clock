@@ -1,17 +1,13 @@
-.day-settings__backdrop--active {
+.day-settings__popper--active {
   transition: all 0.3s;
-}
-
-.day-settings__popper--in {
-  transform: translateY(0);
 }
 
 .day-settings__popper--out {
   transform: translateY(100vh);
 }
 
-.day-settings__backdrop--expanded {
-  height: 100vh;
+.day-settings__popper--in {
+  transform: translateY(0);
 }
 
 .day-settings__popper {
@@ -77,8 +73,8 @@
 
 .day-settings__control__handle {
   position: absolute;
-  width: 7.5%;
-  height: 7.5%;
+  width: 8%;
+  height: 8%;
   background-color: var(--color-md);
   border-radius: 50%;
   box-shadow: -3px -3px 5px 0 #fffa, 3px 3px 5px 0 #0001;
@@ -101,8 +97,6 @@
   padding: 10px 30px;
   color: var(--color-pink-d);
   background: radial-gradient(#ffffff0a 30%, #00000006);
-  border-right: 1px solid #fff;
-  border-left: 2px solid #fff;
 }
 
 .day-settings__control__panel {

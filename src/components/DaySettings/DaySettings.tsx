@@ -1,15 +1,17 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useToggle } from 'react-use';
+import { Transition } from '@headlessui/react';
 import clsx from 'clsx';
 import { Box, Popper } from '@mookiepiece/strawberry-farm';
-import { Portal, useStorage } from '@mookiepiece/strawberry-farm/shared';
-import { Transition } from '@headlessui/react';
+import { Portal, useEventCallback, useStorage } from '@mookiepiece/strawberry-farm/shared';
+
 import { ApiOutlined, CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
 import './styles.scss';
 import shims from '@/utils/shims';
 import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 import { Storages } from '@/storages';
+import { useResizeObserver } from '@/hooks/useResizeObserver';
 
 const radius2timestamp = (r: number) => {
   return (r / 360) * (1000 * 60 * 60 * 24) - 1000 * 60 * 60 * 8;
@@ -48,32 +50,27 @@ const onChange = ([dayStart, dayEnd]: [number, number]) =>
     dayStart,
   }));
 
-const DaySettings: React.FC<{
-  initialValue: [number, number];
-  // eslint-disable-next-line react/display-name
-}> = React.memo(({ initialValue }) => {
+const DaySettings: React.FC = () => {
   const [expanded, toggleExpanded] = useToggle(false);
 
   return (
     <div>
-      <button onClick={toggleExpanded}>
+      <button onClick={() => toggleExpanded()}>
         <CompassOutlined />
       </button>
       <Portal>
         <Transition
-          appear
-          unmount
-          as={React.Fragment}
           show={expanded}
-          enter="day-settings__backdrop--active"
+          as={React.Fragment}
+          enter="day-settings__popper--active"
           enterFrom="day-settings__popper--out"
           enterTo="day-settings__popper--in"
-          leave="day-settings__backdrop--active"
+          leave="day-settings__popper--active"
           leaveFrom="day-settings__popper--in"
           leaveTo="day-settings__popper--out"
         >
           <DaySettingsPopper
-            initialValue={initialValue}
+            className="day-settings__popper"
             onChange={onChange}
             toggleExpanded={toggleExpanded}
           />
@@ -81,7 +78,7 @@ const DaySettings: React.FC<{
       </Portal>
     </div>
   );
-});
+};
 
 const DaySettingsPopper = React.forwardRef<
   HTMLDivElement,
@@ -90,15 +87,39 @@ const DaySettingsPopper = React.forwardRef<
     // Transition Primitive does not support
     // https://github.com/tailwindlabs/headlessui/blob/3e19aa5c97f98aaa4106db3f8a2c9f9fb1ce8386/packages/@headlessui-react/src/utils/render.ts#L188
     toggleExpanded(): void;
-    initialValue: [number, number];
     onChange(value: [number, number]): void;
   }
->(({ initialValue, className, toggleExpanded: onClose, onChange }, popperRef) => {
-  const controlRef = useRef<HTMLDivElement | null>(null);
-  const circleRef = useRef<HTMLDivElement | null>(null);
-  const { top = 0, left = 0, width = 0 } = circleRef.current?.getBoundingClientRect() ?? {};
+>(({ className, toggleExpanded: onClose, onChange }, ref) => {
+  const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
+  // Resize Observer cannot detect position shifting, we'll update position after transition entered
+  const handleTransitionEnd = (e: React.TransitionEvent) => {
+    if (e.target === popperEl) {
+      if (circleEl) setRect(circleEl.getBoundingClientRect());
+    }
+  };
 
-  const [{ snapping }] = useStorage(Storages.lc_local);
+  const [circleEl, setCircleEl] = useState<HTMLDivElement | null>(null);
+
+  const [{ left, top, width }, setRect] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    right: number;
+    bottom: number;
+  }>({
+    top: 0,
+    left: 0,
+    width: 0,
+    height: 0,
+    right: 0,
+    bottom: 0,
+  });
+  useResizeObserver(circleEl, () => {
+    circleEl && setRect(circleEl.getBoundingClientRect());
+  });
+
+  const [{ snapping, dayEnd, dayStart }] = useStorage(Storages.lc_local);
 
   const radius2timestampMagneted = useCallback(
     (r: number) => {
@@ -125,17 +146,17 @@ const DaySettingsPopper = React.forwardRef<
       const y = mouse.y - top;
       return { x, y };
     },
-    [left, top]
+    [top, left]
   );
 
   const [mouse, setMouse] = useState({
     x: 0,
     y: 0,
   });
-  usePointerX(circleRef, setMouse);
+  usePointerX(circleEl, setMouse);
 
   const [hovering, setHovering] = useState(false);
-  useHover(circleRef, setHovering);
+  useHover(circleEl, setHovering);
 
   const r = (width ?? 200) / 2;
 
@@ -147,8 +168,8 @@ const DaySettingsPopper = React.forwardRef<
       360
   );
 
-  const [arcStartRadius, setArcStartRadius] = useState(() => timestamp2radius(initialValue[0]));
-  const [arcEndRadius, setArcEndRadius] = useState(() => timestamp2radius(initialValue[1]));
+  const [arcStartRadius, setArcStartRadius] = useState(() => timestamp2radius(dayStart));
+  const [arcEndRadius, setArcEndRadius] = useState(() => timestamp2radius(dayEnd));
 
   const setArcStart = useCallback(
     (arcStart: { x: number; y: number }) => {
@@ -214,8 +235,15 @@ const DaySettingsPopper = React.forwardRef<
       : visualArcEndRadius + 360 - arcStartRadius;
 
   return (
-    <div ref={popperRef} className={clsx('day-settings__popper', className)}>
-      <div className="day-settings__control" ref={controlRef}>
+    <div
+      ref={useEventCallback(el => {
+        el && setPopperEl(el);
+        el && ref && (typeof ref === 'function' ? ref(el) : (ref.current = el));
+      })}
+      className={clsx(className)}
+      onTransitionEnd={handleTransitionEnd}
+    >
+      <div className="day-settings__control">
         <div className="day-settings__control__panel">{oClockLabelNodes}</div>
         <FloatingLabel
           mouse={mouse}
@@ -223,7 +251,7 @@ const DaySettingsPopper = React.forwardRef<
           label={shims.print(radius2timestamp(mouseRadius))}
         />
         <div
-          ref={circleRef}
+          ref={setCircleEl}
           onTouchStart={handleStart}
           onMouseDown={handleStart}
           className="day-settings__control__svg-container"
@@ -329,7 +357,7 @@ const DaySettingsPopper = React.forwardRef<
           </svg>
         </div>
         <div
-          className="day-settings__control__handle day-settings__control__start-handle"
+          className="day-settings__control__handle"
           style={{
             display: rotationBetween === 0 ? 'none' : undefined,
             transform: `translate(
@@ -345,7 +373,7 @@ const DaySettingsPopper = React.forwardRef<
           onTouchStart={handleStartHandleDragStart}
         ></div>
         <div
-          className="day-settings__control__handle day-settings__control__end-handle"
+          className="day-settings__control__handle"
           style={{
             display: rotationBetween === 0 ? 'none' : undefined,
             transform: `translate(
@@ -423,7 +451,7 @@ const SnappingControl: React.FC = () => {
           </div>
         }
         visible={expanded}
-        onClose={toggleExpanded}
+        // onClose={toggleExpanded}
       >
         <button onClick={toggleExpanded}>
           <ApiOutlined />
@@ -445,7 +473,7 @@ const FloatingLabel: React.FC<{
 
   useFloatingTransform(mouse, labelElRef, {
     active: visible,
-    placement: 'top-start',
+    placement: 'top',
   });
 
   return (

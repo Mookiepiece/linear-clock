@@ -73,7 +73,12 @@ const Clock: React.FC = () => {
               paddingTop: 16,
             }}
           >
-            <DaySettings initialValue={[dayStart, dayEnd]} />
+            {useMemo(
+              () => (
+                <DaySettings />
+              ),
+              []
+            )}
           </div>
           <FocusRail />
         </ClockFnContext.Provider>

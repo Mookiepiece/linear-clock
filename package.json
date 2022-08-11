@@ -38,7 +38,7 @@
     "@babel/preset-react": "^7.12.10",
     "@babel/preset-typescript": "^7.12.7",
     "@babel/runtime-corejs3": "^7.18.9",
-    "@mookiepiece/strawberry-farm": "git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f446f49",
+    "@mookiepiece/strawberry-farm": "git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f47c768",
     "@types/jest": "^27.0.1",
     "@types/nprogress": "^0.2.0",
     "@types/react": "^18.0.15",

@@ -106,7 +106,7 @@ export const useFloat = <T extends HTMLElement = HTMLElement>(
 };
 
 export const useHover = <T extends HTMLElement = HTMLElement>(
-  ref: React.RefObject<T>,
+  el: T | null,
   _setHovering: (hovering: boolean) => void
 ): void => {
   // const [hovering, setHovering] = useState<boolean>(false);
@@ -114,17 +114,15 @@ export const useHover = <T extends HTMLElement = HTMLElement>(
   const setHovering = useEventCallback(_setHovering);
 
   const handlePointerOut = useCallback(() => {
-    const el = ref.current;
     if (el) {
       setHovering(false);
       el.removeEventListener('mouseout', handlePointerOut);
       document.removeEventListener('touchcancel', handlePointerOut);
       document.removeEventListener('touchend', handlePointerOut);
     }
-  }, [ref, setHovering]);
+  }, [el, setHovering]);
 
   const handleMouseOver = useCallback(() => {
-    const el = ref.current;
     if (el) {
       setHovering(true);
 
@@ -132,10 +130,9 @@ export const useHover = <T extends HTMLElement = HTMLElement>(
       document.addEventListener('touchend', handlePointerOut);
       document.addEventListener('touchcancel', handlePointerOut);
     }
-  }, [handlePointerOut, ref, setHovering]);
+  }, [handlePointerOut, el, setHovering]);
 
   useEffect(() => {
-    const el = ref.current;
     if (el) {
       el.addEventListener('mouseover', handleMouseOver);
       el.addEventListener('touchstart', handleMouseOver);
@@ -144,14 +141,14 @@ export const useHover = <T extends HTMLElement = HTMLElement>(
         el.removeEventListener('touchstart', handleMouseOver);
       };
     }
-  }, [handleMouseOver, handlePointerOut, ref]);
+  }, [handleMouseOver, handlePointerOut, el]);
 };
 
 /**
  * WARNING: Element cannot be conditional
  */
 export const usePointerX = <T extends HTMLElement = HTMLElement>(
-  ref: React.RefObject<T>,
+  el: T | null,
   onUpdate: (mouse: { x: number; y: number }) => void
 ): void => {
   const setValue = useEventCallback(onUpdate);
@@ -160,7 +157,6 @@ export const usePointerX = <T extends HTMLElement = HTMLElement>(
 
   useEffect(() => {
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const el = ref.current;
       if (el) {
         setValue(getPosition(e));
       }
@@ -173,14 +169,13 @@ export const usePointerX = <T extends HTMLElement = HTMLElement>(
     document.addEventListener('touchcancel', handlePointerMove);
 
     return () => {
-      // setValue(getPosition());
       document.removeEventListener('mousemove', handlePointerMove);
       document.removeEventListener('touchstart', handlePointerMove);
       document.removeEventListener('touchmove', handlePointerMove);
       document.removeEventListener('touchend', handlePointerMove);
       document.removeEventListener('touchcancel', handlePointerMove);
     };
-  });
+  }, [el, getPosition, setValue]);
 };
 
 /**

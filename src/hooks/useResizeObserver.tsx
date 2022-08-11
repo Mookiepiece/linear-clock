@@ -1,38 +1,17 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import React, { useEffect, useState } from 'react';
+import { useEventCallback } from '@mookiepiece/strawberry-farm/shared';
+import { useEffect } from 'react';
 
 export const useResizeObserver = <T extends HTMLElement | SVGElement>(
-  elRef: React.RefObject<T>
+  el: T | null,
+  callback: ResizeObserverCallback
 ) => {
-  const [state, setState] = useState<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-    right: number;
-    bottom: number;
-  }>({
-    top: 0,
-    left: 0,
-    width: 0,
-    height: 0,
-    right: 0,
-    bottom: 0,
-  });
-
+  const _callback = useEventCallback(callback);
   useEffect(() => {
-    const el = elRef.current;
     if (!el) return;
-    const observer = new ResizeObserver(() => {
-      const { top, left, width, height, right, bottom } = el.getBoundingClientRect();
-      setState({ top, left, width, height, right, bottom });
-    });
+    const observer = new ResizeObserver(_callback);
 
     observer.observe(el);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  return { ...state };
+    return () => observer.disconnect();
+  }, [el, _callback]);
 };

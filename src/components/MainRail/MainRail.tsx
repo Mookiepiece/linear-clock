@@ -95,7 +95,7 @@ const HandFloatingLabel: React.FC<{
 
   useFloatingTransform(mouse, labelElRef, {
     active: hovering,
-    placement: 'top-start',
+    placement: 'top',
     callback: ({ el, x, y }) => {
       el.style.transform = `translate(${x}px, -100px)`;
     },

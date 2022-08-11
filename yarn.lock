@@ -1555,9 +1555,9 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@mookiepiece/strawberry-farm@git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f446f49":
+"@mookiepiece/strawberry-farm@git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f47c768":
   version "0.0.1-alpha.1"
-  resolved "git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f446f49af30920fa8a559eaa085e74551d6e0215"
+  resolved "git+ssh://git@github.com:Mookiepiece/strawberry-farm.git#f47c76883c4852aa26365c3ce43c0ab8170c7470"
   dependencies:
     async-validator "^4.0.7"
     zustand "4.0.0-rc.1"
@@ -1774,16 +1774,7 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*":
-  version "17.0.18"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.18.tgz#4109cbbd901be9582e5e39e3d77acd7b66bb7fbe"
-  integrity sha512-YTLgu7oS5zvSqq49X5Iue5oAbVGhgPc5Au29SJC4VeE17V6gASoOxVkUDy9pXFMRFxCWCD9fLeweNFizo3UzOg==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/scheduler" "*"
-    csstype "^3.0.2"
-
-"@types/react@^18.0.15":
+"@types/react@*", "@types/react@^18.0.15":
   version "18.0.15"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.15.tgz#d355644c26832dc27f3e6cbf0c4f4603fc4ab7fe"
   integrity sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==

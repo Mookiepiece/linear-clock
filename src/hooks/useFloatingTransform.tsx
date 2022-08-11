@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { computePosition, flip, Placement } from '@floating-ui/dom';
+import { computePosition, flip, shift, Placement } from '@floating-ui/dom';
 import { useEventCallback } from './useSlider';
 
 export const useFloatingTransform = <T extends HTMLDivElement | null>(
@@ -42,7 +42,7 @@ export const useFloatingTransform = <T extends HTMLDivElement | null>(
         },
         el,
         {
-          middleware: [flip()],
+          middleware: [flip(), shift()],
           placement,
         }
       ).then(({ x, y }) => {
