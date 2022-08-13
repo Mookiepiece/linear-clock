@@ -10,14 +10,14 @@ const lc_local = versionedStorage<{
   version: 2,
   initialValue: {
     dayStart: (() => {
-      const today0800 = new Date(0);
-      today0800.setHours(6, 0, 0, 0);
-      return today0800.getTime();
+      const t = new Date(0);
+      t.setHours(6, 0, 0, 0);
+      return t.getTime();
     })(),
     dayEnd: (() => {
-      const today2230 = new Date(0);
-      today2230.setHours(22, 30, 0, 0);
-      return today2230.getTime();
+      const t = new Date(0);
+      t.setHours(22, 30, 0, 0);
+      return t.getTime();
     })(),
     snapping: 15,
   },

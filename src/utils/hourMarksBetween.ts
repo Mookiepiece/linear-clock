@@ -1,6 +1,5 @@
-import shims from './shims';
-
-const HOURS = [...Array(24).keys()];
+import $ from '@/utils/$';
+import { TIMESTAMP_1H } from './constants';
 
 export const hourMarksBetween = (
   _startTime: number | Date,
@@ -10,29 +9,26 @@ export const hourMarksBetween = (
   percentage: number;
 }[] => {
   const [startTime, endTime] = [
-    typeof _startTime === 'number' ? new Date(_startTime) : _startTime,
-    typeof _endTime === 'number' ? new Date(_endTime) : _endTime,
+    _startTime instanceof Date ? _startTime.getTime() : _startTime,
+    _endTime instanceof Date ? _endTime.getTime() : _endTime,
   ];
+
+  const oclocksWithPosition: { hour: number; percentage: number }[] = [];
 
   const d = new Date(startTime);
   d.setMinutes(0);
   d.setSeconds(0);
   d.setMilliseconds(0);
 
-  const oclocks = HOURS.filter(t => {
-    d.setHours(t);
-    return d.getTime() >= startTime.getTime() && d.getTime() <= endTime.getTime();
-  });
-
-  const oclocksWithPosition = oclocks.map(hour => {
-    d.setHours(hour);
-    return {
-      hour,
-      percentage: shims.round2(
-        ((d.getTime() - startTime.getTime()) / (endTime.getTime() - startTime.getTime())) * 100
-      ),
-    };
-  });
+  while (d.getTime() <= endTime) {
+    if (d.getTime() >= startTime) {
+      oclocksWithPosition.push({
+        hour: d.getHours(),
+        percentage: $.round2(((d.getTime() - startTime) / (endTime - startTime)) * 100),
+      });
+    }
+    d.setTime(d.getTime() + TIMESTAMP_1H);
+  }
 
   return oclocksWithPosition;
 };

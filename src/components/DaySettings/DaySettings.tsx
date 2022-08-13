@@ -1,24 +1,24 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useToggle } from 'react-use';
 import { Transition } from '@headlessui/react';
 import clsx from 'clsx';
 import { Box, Popper } from '@mookiepiece/strawberry-farm';
 import { Portal, useEventCallback, useStorage } from '@mookiepiece/strawberry-farm/shared';
-
 import { ApiOutlined, CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
 import './styles.scss';
-import shims from '@/utils/shims';
+import $ from '@/utils/$';
 import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 import { Storages } from '@/storages';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
+import { TIMESTAMP_24H, TIMESTAMP_8H } from '@/utils/constants';
 
 const radius2timestamp = (r: number) => {
-  return (r / 360) * (1000 * 60 * 60 * 24) - 1000 * 60 * 60 * 8;
+  return (r / 360) * TIMESTAMP_24H - TIMESTAMP_8H;
 };
 
 const timestamp2radius = (t: number) => {
-  return ((t + 1000 * 60 * 60 * 8) / (1000 * 60 * 60 * 24)) * 360;
+  return (((t + TIMESTAMP_8H) / TIMESTAMP_24H) * 360) % 360;
 };
 
 const oClockLabelNodes = [...Array(24).keys()].map(i => {
@@ -89,14 +89,8 @@ const DaySettingsPopper = React.forwardRef<
     toggleExpanded(): void;
     onChange(value: [number, number]): void;
   }
->(({ className, toggleExpanded: onClose, onChange }, ref) => {
+>(function DaySettingsPopper({ className, toggleExpanded: onClose, onChange }, ref) {
   const [popperEl, setPopperEl] = useState<HTMLDivElement | null>(null);
-  // Resize Observer cannot detect position shifting, we'll update position after transition entered
-  const handleTransitionEnd = (e: React.TransitionEvent) => {
-    if (e.target === popperEl) {
-      if (circleEl) setRect(circleEl.getBoundingClientRect());
-    }
-  };
 
   const [circleEl, setCircleEl] = useState<HTMLDivElement | null>(null);
 
@@ -118,6 +112,12 @@ const DaySettingsPopper = React.forwardRef<
   useResizeObserver(circleEl, () => {
     circleEl && setRect(circleEl.getBoundingClientRect());
   });
+  // Resize Observer cannot detect position shifting, we'll update position after transition entered
+  const handleTransitionEnd = (e: React.TransitionEvent) => {
+    if (e.target === popperEl) {
+      if (circleEl) setRect(circleEl.getBoundingClientRect());
+    }
+  };
 
   const [{ snapping, dayEnd, dayStart }] = useStorage(Storages.lc_local);
 
@@ -132,7 +132,7 @@ const DaySettingsPopper = React.forwardRef<
     },
     [snapping]
   );
-  const getMagnetedRadius = useCallback(
+  const getSnappedRadius = useCallback(
     (r: number) => {
       if (snapping === 0) return r;
       return timestamp2radius(radius2timestampMagneted(r));
@@ -160,71 +160,70 @@ const DaySettingsPopper = React.forwardRef<
 
   const r = (width ?? 200) / 2;
 
-  const mouseRadius = getMagnetedRadius(
-    (270 -
-      (Math.atan2(r - (relativeToCircle(mouse).y ?? 0), (relativeToCircle(mouse).x ?? 0) - r) *
-        180) /
-        Math.PI) %
-      360
+  const position2Radius = useCallback(
+    (pos: { x: number; y: number }) =>
+      (270 - (Math.atan2(r - (pos?.y ?? 0), (pos?.x ?? 0) - r) * 180) / Math.PI) % 360,
+    [r]
   );
+
+  const mouseRadius = getSnappedRadius(position2Radius(relativeToCircle(mouse)));
 
   const [arcStartRadius, setArcStartRadius] = useState(() => timestamp2radius(dayStart));
   const [arcEndRadius, setArcEndRadius] = useState(() => timestamp2radius(dayEnd));
 
-  const setArcStart = useCallback(
-    (arcStart: { x: number; y: number }) => {
-      setArcStartRadius(
-        getMagnetedRadius(
-          (270 - (Math.atan2(r - (arcStart?.y ?? 0), (arcStart?.x ?? 0) - r) * 180) / Math.PI) % 360
-        )
-      );
+  const setArcStartWithMouse = useCallback(
+    (mouse: { x: number; y: number }) => {
+      setArcStartRadius(getSnappedRadius(position2Radius(relativeToCircle(mouse))));
     },
-    [getMagnetedRadius, r]
+    [getSnappedRadius, position2Radius, relativeToCircle]
   );
 
-  const setArcEnd = useCallback(
-    (arcEnd: { x: number; y: number }) => {
-      setArcEndRadius(
-        getMagnetedRadius(
-          (270 - (Math.atan2(r - (arcEnd?.y ?? 0), (arcEnd?.x ?? 0) - r) * 180) / Math.PI) % 360
-        )
-      );
+  const setArcEndWithMouse = useCallback(
+    (mouse: { x: number; y: number }) => {
+      setArcEndRadius(getSnappedRadius(position2Radius(relativeToCircle(mouse))));
     },
-    [getMagnetedRadius, r]
+    [getSnappedRadius, position2Radius, relativeToCircle]
   );
 
   const { active, handleStart } = useSlider({
     onStart({ mouse }) {
-      setArcStart(relativeToCircle(mouse));
+      setArcStartWithMouse(mouse);
     },
     onEnd({ mouse }) {
-      setArcEnd(relativeToCircle(mouse));
+      setArcEndWithMouse(mouse);
     },
   });
 
   const { active: startHandleDragActive, handleStart: handleStartHandleDragStart } = useSlider({
     onStart({ mouse }) {
-      setArcStart(relativeToCircle(mouse));
+      setArcStartWithMouse(mouse);
     },
     onChange({ mouse }) {
-      setArcStart(relativeToCircle(mouse));
+      setArcStartWithMouse(mouse);
     },
     onEnd({ mouse }) {
-      setArcStart(relativeToCircle(mouse));
+      setArcStartWithMouse(mouse);
     },
   });
 
   const { active: endHandleDragActive, handleStart: handleEndHandleDragStart } = useSlider({
     onStart({ mouse }) {
-      setArcEnd(relativeToCircle(mouse));
+      setArcEndWithMouse(mouse);
     },
     onChange({ mouse }) {
-      setArcEnd(relativeToCircle(mouse));
+      setArcEndWithMouse(mouse);
     },
     onEnd({ mouse }) {
-      setArcEnd(relativeToCircle(mouse));
+      setArcEndWithMouse(mouse);
     },
   });
+
+  const save = () => {
+    const dayStart = radius2timestamp(arcStartRadius);
+    const dayEnd = radius2timestamp(arcEndRadius);
+    onChange([dayStart, dayEnd]);
+    onClose();
+  };
 
   // the elX & elY we access in useSlider is snapshots the last frame which is stale.
   const visualArcEndRadius = active ? mouseRadius : arcEndRadius;
@@ -248,7 +247,7 @@ const DaySettingsPopper = React.forwardRef<
         <FloatingLabel
           mouse={mouse}
           visible={startHandleDragActive || endHandleDragActive || active || hovering}
-          label={shims.print(radius2timestamp(mouseRadius))}
+          label={$.print(radius2timestamp(mouseRadius))}
         />
         <div
           ref={setCircleEl}
@@ -267,6 +266,7 @@ const DaySettingsPopper = React.forwardRef<
             {(() => {
               /**
                * ```txt
+               *
                * ---------------------
                * Total Width
                *
@@ -280,6 +280,7 @@ const DaySettingsPopper = React.forwardRef<
                *            svg.r
                * |---------|
                * svg.stoke
+               *
                * ```
                */
               const transparentR = width / 2.2;
@@ -380,18 +381,12 @@ const DaySettingsPopper = React.forwardRef<
             </button>
           </div>
           <Box align="center" justify="center">
-            {shims.print(radius2timestamp(arcStartRadius))}
+            {$.print(radius2timestamp(arcStartRadius))}
             {' ~ '}
-            {shims.print(radius2timestamp(visualArcEndRadius))}
+            {$.print(radius2timestamp(visualArcEndRadius))}
           </Box>
           <div>
-            <button
-              disabled={rotationBetween === 0}
-              onClick={() => {
-                onChange([radius2timestamp(arcStartRadius), radius2timestamp(visualArcEndRadius)]);
-                onClose();
-              }}
-            >
+            <button disabled={rotationBetween === 0} onClick={save}>
               <CheckOutlined />
             </button>
           </div>

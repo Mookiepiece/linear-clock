@@ -3,12 +3,13 @@ import { Box } from '@mookiepiece/strawberry-farm';
 import { useStorage } from '@mookiepiece/strawberry-farm/shared';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useMedia } from 'react-use';
-import shims from '../../utils/shims';
+import $ from '@/utils/$';
 import DaySettings from '../DaySettings';
 import FocusRail from '../FocusRail/FocusRail';
 import MainRail from '../MainRail';
 import { ClockContext, ClockFnContext } from './exports';
 import './styles.scss';
+import { TIMESTAMP_24H } from '@/utils/constants';
 
 const Clock: React.FC = () => {
   const [{ dayStart, dayEnd }] = useStorage(Storages.lc_local);
@@ -31,23 +32,24 @@ const Clock: React.FC = () => {
   }, []);
   const now = time.getTime();
 
-  const d2230_0800 = dayEnd - dayStart;
+  const dayEndShifted = dayEnd + (dayEnd < dayStart ? TIMESTAMP_24H : 0);
+  const nowShifted = now + (now < dayStart ? TIMESTAMP_24H : 0);
+
+  const dayDuration = dayEndShifted - dayStart;
 
   const point2time = useCallback(
     (v: number) => {
-      return (v / 100) * d2230_0800 + dayStart;
+      return (v / 100) * dayDuration + dayStart;
     },
-    [d2230_0800, dayStart]
+    [dayDuration, dayStart]
   );
 
   const time2point = useCallback(
     (t: number) => {
-      return shims.clamp(shims.round2(((t - dayStart) / d2230_0800) * 100));
+      return $.clamp($.round2(((t - dayStart) / dayDuration) * 100));
     },
-    [dayStart, d2230_0800]
+    [dayStart, dayDuration]
   );
-
-  const nowPercentage = time2point(now);
 
   const clockFnContextValue = useMemo(
     () => ({
@@ -65,8 +67,9 @@ const Clock: React.FC = () => {
         value={{
           dayStart,
           dayEnd,
+          dayEndShifted,
           now,
-          nowPercentage,
+          nowShifted,
         }}
       >
         <ClockFnContext.Provider value={clockFnContextValue}>

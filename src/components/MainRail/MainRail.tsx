@@ -3,7 +3,7 @@ import { useEventCallback, usePointer, useSlider } from '@/hooks/useSlider';
 import { Text } from '@/primitives';
 import { Box } from '@mookiepiece/strawberry-farm';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import shims from '../../utils/shims';
+import shims from '../../utils/$';
 import { ClockContext, ClockFnContext } from '../Clock/exports';
 import Rail from '../Rail/Rail';
 import { MainRailMitt } from './exports';
@@ -52,7 +52,7 @@ const MainRail: React.FC = () => {
     }
   }, [focusStart, focusEnd]);
 
-  const { dayStart, dayEnd } = useContext(ClockContext);
+  const { nowShifted, dayStart, dayEndShifted } = useContext(ClockContext);
 
   return (
     <div
@@ -61,7 +61,7 @@ const MainRail: React.FC = () => {
       onTouchStart={handleSetFocusPeriodStart}
       ref={railRef}
     >
-      <Rail startTime={dayStart} endTime={dayEnd} />
+      <Rail now={nowShifted} startTime={dayStart} endTime={dayEndShifted} />
 
       <HandFloatingLabel railRef={railRef} />
       {focusStart === null || focusStart === focusEnd ? null : (

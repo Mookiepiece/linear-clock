@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { ClockContext } from '../Clock/exports';
 import { MainRailMitt } from '../MainRail/exports';
 import MiniRail from '../MiniRail';
 import './styles.scss';
 
 const FocusRail: React.FC = () => {
+  const { nowShifted } = useContext(ClockContext);
   const [[startMark, endMark], setMark] = useState<[number, number] | []>([]);
 
   useEffect(() => {
@@ -15,7 +17,7 @@ const FocusRail: React.FC = () => {
 
   return (
     <div className="focus-rail">
-      <MiniRail startTime={startMark} endTime={endMark} />
+      <MiniRail now={nowShifted} startTime={startMark} endTime={endMark} />
     </div>
   );
 };

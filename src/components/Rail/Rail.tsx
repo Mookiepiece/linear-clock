@@ -1,22 +1,20 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Box } from '@mookiepiece/strawberry-farm';
 import { Text } from '@/primitives';
 import { hourMarksBetween } from '@/utils/hourMarksBetween';
-import shims from '@/utils/shims';
-import { ClockContext } from '../Clock/exports';
+import $ from '@/utils/$';
 import './styles.scss';
 
 export type RailProps = {
+  now: number;
   startTime: number;
   endTime: number;
 };
 
-const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
+const Rail: React.FC<RailProps> = ({ now, startTime, endTime }) => {
   const hourMarks = hourMarksBetween(startTime, endTime);
 
-  const { now } = useContext(ClockContext);
-
-  const activePercentage = shims.round2(((now - startTime) / (endTime - startTime)) * 100);
+  const activePercentage = $.clamp($.round2(((now - startTime) / (endTime - startTime)) * 100));
 
   return (
     <div className="rail">
@@ -49,8 +47,8 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
         ></div>
       </div>
       <Box className="my-30" horizontal align="center">
-        <Text>{shims.print(now, 'HMS')} </Text>
-        <Text solid>{shims.round2(100 - activePercentage)}%</Text>
+        <Text>{$.print(now, 'HMS')} </Text>
+        <Text solid>{$.round2(100 - activePercentage)}%</Text>
       </Box>
     </div>
   );
