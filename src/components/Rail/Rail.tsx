@@ -1,9 +1,10 @@
-import { Text } from '@/primitives';
-import shims from '@/utils/shims';
 import React, { useContext } from 'react';
+import { Box } from '@mookiepiece/strawberry-farm';
+import { Text } from '@/primitives';
+import { hourMarksBetween } from '@/utils/hourMarksBetween';
+import shims from '@/utils/shims';
 import { ClockContext } from '../Clock/exports';
 import './styles.scss';
-import { useOClockMarks } from './useOClockMarks';
 
 export type RailProps = {
   startTime: number;
@@ -11,7 +12,7 @@ export type RailProps = {
 };
 
 const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
-  const oclockMarks = useOClockMarks(startTime, endTime);
+  const hourMarks = hourMarksBetween(startTime, endTime);
 
   const { now } = useContext(ClockContext);
 
@@ -20,11 +21,11 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
   return (
     <div className="rail">
       <div className="rail__inner">
-        <div className="rail__labels">
-          {oclockMarks.map(({ hour, percentage }) => (
+        <div className="rail__hour-labels">
+          {hourMarks.map(({ hour, percentage }) => (
             <div
               key={hour}
-              className="rail__label"
+              className="rail__hour-label"
               style={{ left: `${percentage}%` }}
               data-hour={hour}
             ></div>
@@ -47,11 +48,10 @@ const Rail: React.FC<RailProps> = ({ startTime, endTime }) => {
           }
         ></div>
       </div>
-      <div className="time-label">
-        <Text>
-          {shims.print(now, 'HMS')} <Text solid>{shims.round2(100 - activePercentage)}%</Text>
-        </Text>
-      </div>
+      <Box className="my-30" horizontal align="center">
+        <Text>{shims.print(now, 'HMS')} </Text>
+        <Text solid>{shims.round2(100 - activePercentage)}%</Text>
+      </Box>
     </div>
   );
 };

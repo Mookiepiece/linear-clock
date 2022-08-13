@@ -1,6 +1,8 @@
 import { Storages } from '@/storages';
+import { Box } from '@mookiepiece/strawberry-farm';
 import { useStorage } from '@mookiepiece/strawberry-farm/shared';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useMedia } from 'react-use';
 import shims from '../../utils/shims';
 import DaySettings from '../DaySettings';
 import FocusRail from '../FocusRail/FocusRail';
@@ -55,6 +57,8 @@ const Clock: React.FC = () => {
     [point2time, time2point]
   );
 
+  const sm = useMedia('(mim-width: 576px)');
+
   return (
     <div className="clock">
       <ClockContext.Provider
@@ -68,19 +72,10 @@ const Clock: React.FC = () => {
         <ClockFnContext.Provider value={clockFnContextValue}>
           <MainRail />
 
-          <div
-            style={{
-              paddingTop: 16,
-            }}
-          >
-            {useMemo(
-              () => (
-                <DaySettings />
-              ),
-              []
-            )}
-          </div>
-          <FocusRail />
+          <Box horizontal={!sm} gap={10} align="center">
+            <DaySettings />
+            <FocusRail />
+          </Box>
         </ClockFnContext.Provider>
       </ClockContext.Provider>
     </div>

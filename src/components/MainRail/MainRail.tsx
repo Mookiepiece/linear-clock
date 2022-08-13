@@ -1,6 +1,7 @@
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 import { useEventCallback, usePointer, useSlider } from '@/hooks/useSlider';
 import { Text } from '@/primitives';
+import { Box } from '@mookiepiece/strawberry-farm';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import shims from '../../utils/shims';
 import { ClockContext, ClockFnContext } from '../Clock/exports';
@@ -36,8 +37,6 @@ const MainRail: React.FC = () => {
 
   // FEAT: MouseMove
   const railRef = useRef<HTMLDivElement>(null);
-
-  // const { left = 0, width = 0 } = railRef.current?.getBoundingClientRect() ?? {};
 
   const { handleStart: handleSetFocusPeriodStart } = useSlider({
     onStart: setStartMark,
@@ -97,29 +96,19 @@ const HandFloatingLabel: React.FC<{
     active: hovering,
     placement: 'top',
     callback: ({ el, x, y }) => {
-      el.style.transform = `translate(${x}px, -100px)`;
+      el.style.transform = `translate(${x}px, -40px)`;
     },
   });
 
   return (
-    <>
-      {/* <div
-        className="hand"
-        style={{
-          opacity: hovering ? '1' : '0',
-          transform: `translate(${mouse.x - left - 5}px)`,
-          transition: 'opacity .1s',
-        }}
-      ></div> */}
-      <div className="hand__label" ref={labelElRef}>
-        <Text color="pink">
-          {shims.print(point2time(mousePercentage))}{' '}
-          <Text color="pink" solid>
-            {restMousePercentage}%
-          </Text>
+    <div className="hand__label" ref={labelElRef}>
+      <Box horizontal align="center">
+        <Text color="pink">{shims.print(point2time(mousePercentage))} </Text>
+        <Text color="pink" solid>
+          {restMousePercentage}%
         </Text>
-      </div>
-    </>
+      </Box>
+    </div>
   );
 };
 

@@ -1,8 +1,8 @@
-import shims from '@/utils/shims';
+import shims from './shims';
 
-const ALL_OCLOCKS = [...Array(24).keys()];
+const HOURS = [...Array(24).keys()];
 
-export const useOClockMarks = (
+export const hourMarksBetween = (
   _startTime: number | Date,
   _endTime: number | Date
 ): {
@@ -19,7 +19,7 @@ export const useOClockMarks = (
   d.setSeconds(0);
   d.setMilliseconds(0);
 
-  const oclocks = ALL_OCLOCKS.filter(t => {
+  const oclocks = HOURS.filter(t => {
     d.setHours(t);
     return d.getTime() >= startTime.getTime() && d.getTime() <= endTime.getTime();
   });

@@ -261,15 +261,8 @@ const DaySettingsPopper = React.forwardRef<
         >
           <svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop
-                offset="0%"
-                style={{
-                  color: '#fd3',
-
-                  stopColor: 'currentColor',
-                }}
-              />
-              <stop offset="100%" style={{ color: '#39f', stopColor: 'currentColor' }} />
+              <stop offset="0%" style={{ stopColor: '#fd3' }} />
+              <stop offset="100%" style={{ stopColor: '#39f' }} />
             </linearGradient>
             {(() => {
               /**
@@ -318,17 +311,6 @@ const DaySettingsPopper = React.forwardRef<
         </div>
         <div className="day-settings__control__panel-drop-shadow">
           <svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop
-                offset="0%"
-                style={{
-                  color: '#fd3',
-
-                  stopColor: 'currentColor',
-                }}
-              />
-              <stop offset="100%" style={{ color: '#39f', stopColor: 'currentColor' }} />
-            </linearGradient>
             {(() => {
               const r = width / 4;
               const r2 = width / 2;
@@ -451,7 +433,7 @@ const SnappingControl: React.FC = () => {
           </div>
         }
         visible={expanded}
-        // onClose={toggleExpanded}
+        onClose={toggleExpanded}
       >
         <button onClick={toggleExpanded}>
           <ApiOutlined />

@@ -1,7 +1,6 @@
-import shims from '@/utils/shims';
 import React, { useEffect, useState } from 'react';
 import { MainRailMitt } from '../MainRail/exports';
-import Rail from '../Rail';
+import MiniRail from '../MiniRail';
 import './styles.scss';
 
 const FocusRail: React.FC = () => {
@@ -16,10 +15,7 @@ const FocusRail: React.FC = () => {
 
   return (
     <div className="focus-rail">
-      Focusing ({shims.print(startMark)} - {shims.print(endMark)})
-      <br />
-      <br />
-      <Rail startTime={startMark} endTime={endMark} />
+      <MiniRail startTime={startMark} endTime={endMark} />
     </div>
   );
 };
