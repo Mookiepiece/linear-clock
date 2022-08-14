@@ -1,5 +1,9 @@
 # Linear Clock
 
+<p align="center">
+  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/logo.png" width="200px" alt="logo" />
+</p>
+
 Linear Clock - How much is left?
 
 A productivity web app that visualize how much time has passed and how much time remains based on the daily hours you set.
@@ -11,13 +15,15 @@ A productivity web app that visualize how much time has passed and how much time
 ## Screenshots
 
 Linear clock:
+
 <a href="https://mookiepiece.github.io/linear-clock/">
-<img src="https://github.com/Mookiepiece/linear-clock/blob/dev/assets/screenshot1.jpg" alt="screenshot" />
+  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot1.jpg" alt="screenshot" />
 </a>
 
 Daily hours settings:
+
 <a href="https://mookiepiece.github.io/linear-clock/">
-<img src="https://github.com/Mookiepiece/linear-clock/blob/dev/assets/screenshot2.jpg" alt="screenshot" />
+  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot2.jpg" alt="screenshot" />
 </a>
 
 ## Available here
