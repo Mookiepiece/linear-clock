@@ -4,6 +4,7 @@ import { Text } from '@/primitives';
 import { hourMarksBetween } from '@/utils/hourMarksBetween';
 import $ from '@/utils/$';
 import './styles.scss';
+import { time } from '@/utils/time';
 
 export type RailProps = {
   now: number;
@@ -47,7 +48,7 @@ const Rail: React.FC<RailProps> = ({ now, startTime, endTime }) => {
         ></div>
       </div>
       <Box className="my-30" horizontal align="center">
-        <Text>{$.print(now, 'HMS')} </Text>
+        <Text>{time.print(time.fromTimeStamp(now), 'HMS')} </Text>
         <Text solid>{$.round2(100 - activePercentage)}%</Text>
       </Box>
     </div>

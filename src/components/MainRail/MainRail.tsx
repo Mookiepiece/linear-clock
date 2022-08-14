@@ -2,27 +2,27 @@ import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 import { useEventCallback, usePointer, useSlider } from '@/hooks/useSlider';
 import { Text } from '@/primitives';
 import { Box } from '@mookiepiece/strawberry-farm';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import shims from '../../utils/$';
-import { ClockContext, ClockFnContext } from '../Clock/exports';
+import React, { useContext, useRef } from 'react';
+import $ from '@/utils/$';
+import { ClockContext } from '../Clock/exports';
 import Rail from '../Rail/Rail';
-import { MainRailMitt } from './exports';
 import './styles.scss';
+import { time } from '@/utils/time';
 
 const MainRail: React.FC = () => {
-  const { point2time, time2point } = useContext(ClockFnContext);
-
-  const [[focusStart, focusEnd], setFocusPeriod] = useState<[number | null, number | null]>([
-    null,
-    null,
-  ]);
+  const {
+    percentage2Timestamp,
+    timestamp2Percentage,
+    focusPeriod: [focusStart, focusEnd],
+    setFocusPeriod,
+  } = useContext(ClockContext);
 
   const setStartMark = ({ mouse: { x } }: { mouse: { x: number; y: number } }) => {
     if (!railRef.current) throw new Error();
 
     const { left, width } = railRef.current.getBoundingClientRect();
-    const cursorPercentage = shims.clamp(shims.round2(((x - left) / width) * 100));
-    const cursorTime = point2time(cursorPercentage);
+    const cursorPercentage = $.clamp($.round2(((x - left) / width) * 100));
+    const cursorTime = percentage2Timestamp(cursorPercentage);
     setFocusPeriod([cursorTime, null]);
   };
 
@@ -30,12 +30,11 @@ const MainRail: React.FC = () => {
     if (!railRef.current) throw new Error();
 
     const { left, width } = railRef.current.getBoundingClientRect();
-    const cursorPercentage = shims.clamp(shims.round2(((x - left) / width) * 100));
-    const cursorTime = point2time(cursorPercentage);
+    const cursorPercentage = $.clamp($.round2(((x - left) / width) * 100));
+    const cursorTime = percentage2Timestamp(cursorPercentage);
     setFocusPeriod([focusStart, Math.max(cursorTime, cursorTime)]);
   });
 
-  // FEAT: MouseMove
   const railRef = useRef<HTMLDivElement>(null);
 
   const { handleStart: handleSetFocusPeriodStart } = useSlider({
@@ -43,14 +42,6 @@ const MainRail: React.FC = () => {
     onChange: setEndMark,
     onEnd: setEndMark,
   });
-
-  useEffect(() => {
-    if (focusStart && focusEnd && focusStart < focusEnd) {
-      MainRailMitt.emit('MARK', [focusStart, focusEnd]);
-    } else {
-      MainRailMitt.emit('UNMARK');
-    }
-  }, [focusStart, focusEnd]);
 
   const { nowShifted, dayStart, dayEndShifted } = useContext(ClockContext);
 
@@ -65,10 +56,10 @@ const MainRail: React.FC = () => {
 
       <HandFloatingLabel railRef={railRef} />
       {focusStart === null || focusStart === focusEnd ? null : (
-        <div className="startmark" style={{ left: `${time2point(focusStart)}%` }}></div>
+        <div className="startmark" style={{ left: `${timestamp2Percentage(focusStart)}%` }}></div>
       )}
       {focusEnd === null || focusStart === focusEnd ? null : (
-        <div className="endmark" style={{ left: `${time2point(focusEnd)}%` }}></div>
+        <div className="endmark" style={{ left: `${timestamp2Percentage(focusEnd)}%` }}></div>
       )}
     </div>
   );
@@ -77,25 +68,22 @@ const MainRail: React.FC = () => {
 const HandFloatingLabel: React.FC<{
   railRef: React.RefObject<HTMLElement>;
 }> = ({ railRef }) => {
+  const { percentage2Timestamp } = useContext(ClockContext);
   const { active: hovering, mouse } = usePointer(railRef);
   const { left = 0, width = 0 } = railRef.current?.getBoundingClientRect() ?? {};
 
-  const _mousePercentage = !hovering
-    ? null
-    : shims.clamp(shims.round2(((mouse.x - left) / width) * 100));
-
+  const _mousePercentage = !hovering ? null : $.clamp($.round2(((mouse.x - left) / width) * 100));
   const lastMousePercentageRef = useRef(0);
   const mousePercentage = (lastMousePercentageRef.current =
     _mousePercentage ?? lastMousePercentageRef.current);
-  const restMousePercentage = shims.round2(100 - mousePercentage);
+  const restMousePercentage = $.round2(100 - mousePercentage);
 
   const labelElRef = useRef<HTMLDivElement | null>(null);
-  const { point2time } = useContext(ClockFnContext);
 
   useFloatingTransform(mouse, labelElRef, {
     active: hovering,
     placement: 'top',
-    callback: ({ el, x, y }) => {
+    callback: ({ el, x }) => {
       el.style.transform = `translate(${x}px, -40px)`;
     },
   });
@@ -103,7 +91,9 @@ const HandFloatingLabel: React.FC<{
   return (
     <div className="hand__label" ref={labelElRef}>
       <Box horizontal align="center">
-        <Text color="pink">{shims.print(point2time(mousePercentage))} </Text>
+        <Text color="pink">
+          {time.print(time.fromTimeStamp(percentage2Timestamp(mousePercentage)))}{' '}
+        </Text>
         <Text color="pink" solid>
           {restMousePercentage}%
         </Text>

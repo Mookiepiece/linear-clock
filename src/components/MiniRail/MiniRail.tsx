@@ -1,5 +1,6 @@
 import { Text } from '@/primitives';
 import $ from '@/utils/$';
+import { time } from '@/utils/time';
 import { Box } from '@mookiepiece/strawberry-farm';
 import React from 'react';
 import './styles.scss';
@@ -11,7 +12,7 @@ export type MiniRailProps = {
 };
 
 const Rail: React.FC<MiniRailProps> = ({ now, startTime, endTime }) => {
-  const activePercentage = $.round2(((now - startTime) / (endTime - startTime)) * 100);
+  const activePercentage = $.clamp($.round2(((now - startTime) / (endTime - startTime)) * 100));
 
   return (
     <Box gap={5}>
@@ -30,7 +31,9 @@ const Rail: React.FC<MiniRailProps> = ({ now, startTime, endTime }) => {
           {$.round2(100 - activePercentage)}%
         </Text>
         <Text level={2}>
-          {' ' + $.print(startTime)} - {$.print(endTime)}
+          {` ${time.print(time.fromTimeStamp(startTime))} - ${time.print(
+            time.fromTimeStamp(endTime)
+          )}`}
         </Text>
       </Box>
     </Box>

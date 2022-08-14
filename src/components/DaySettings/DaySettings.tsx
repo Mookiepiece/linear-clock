@@ -6,19 +6,19 @@ import { Box, Popper } from '@mookiepiece/strawberry-farm';
 import { Portal, useEventCallback, useStorage } from '@mookiepiece/strawberry-farm/shared';
 import { ApiOutlined, CheckOutlined, CloseOutlined, CompassOutlined } from '@ant-design/icons';
 import './styles.scss';
-import $ from '@/utils/$';
 import { useHover, usePointerX, useSlider } from '@/hooks/useSlider';
 import { useFloatingTransform } from '@/hooks/useFloatingTransform';
 import { Storages } from '@/storages';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
-import { TIMESTAMP_24H, TIMESTAMP_8H } from '@/utils/constants';
+import { TIMESTAMP_24H } from '@/utils/constants';
+import { time } from '@/utils/time';
 
 const radius2timestamp = (r: number) => {
-  return (r / 360) * TIMESTAMP_24H - TIMESTAMP_8H;
+  return (r / 360) * TIMESTAMP_24H;
 };
 
 const timestamp2radius = (t: number) => {
-  return (((t + TIMESTAMP_8H) / TIMESTAMP_24H) * 360) % 360;
+  return ((t / TIMESTAMP_24H) * 360) % 360;
 };
 
 const oClockLabelNodes = [...Array(24).keys()].map(i => {
@@ -247,7 +247,7 @@ const DaySettingsPopper = React.forwardRef<
         <FloatingLabel
           mouse={mouse}
           visible={startHandleDragActive || endHandleDragActive || active || hovering}
-          label={$.print(radius2timestamp(mouseRadius))}
+          label={time.print(time.fromTimeStamp(radius2timestamp(mouseRadius)))}
         />
         <div
           ref={setCircleEl}
@@ -381,9 +381,9 @@ const DaySettingsPopper = React.forwardRef<
             </button>
           </div>
           <Box align="center" justify="center">
-            {$.print(radius2timestamp(arcStartRadius))}
+            {time.print(time.fromTimeStamp(radius2timestamp(arcStartRadius)))}
             {' ~ '}
-            {$.print(radius2timestamp(visualArcEndRadius))}
+            {time.print(time.fromTimeStamp(radius2timestamp(visualArcEndRadius)))}
           </Box>
           <div>
             <button disabled={rotationBetween === 0} onClick={save}>
