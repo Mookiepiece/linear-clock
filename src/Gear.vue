@@ -191,13 +191,15 @@ const handlers = computed(() => {
 });
 
 const useHandler = (el: Ref<HTMLElement | undefined>, mapping: 'A' | 'B') => {
-  watchEffect(() => {
+  watchEffect(onCleanup => {
     const $el = el.value;
     if (!$el) return;
-    on($el).pointerdown(e => {
-      $el.setPointerCapture(e.pointerId);
-      pressed.value = mapping;
-    });
+    onCleanup(
+      on($el).pointerdown(e => {
+        $el.setPointerCapture(e.pointerId);
+        pressed.value = mapping;
+      }),
+    );
   });
 };
 const handlerA = ref<HTMLElement>();
