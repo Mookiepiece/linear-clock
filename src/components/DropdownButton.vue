@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { on } from '../ui/on';
+import { onClickAway } from '../ui/onClickAway';
 import { Bag } from '../ui/collection';
 
 const model = defineModel();
@@ -56,15 +57,20 @@ const place = () => {
   $pop.style.setProperty('transform', y + 'px');
 };
 
-let offAuto = () => {};
+const bag = Bag();
 const onEnter = () => {
   const $ref = reference.value!;
   const $pop = popper.value!;
-  offAuto = auto([$ref, $pop], place);
+  bag(auto([$ref, $pop], place));
+  bag(
+    onClickAway([$ref, $pop], () => {
+      open.value = false;
+    }),
+  );
 };
 
 const onBeforeLeave = () => {
-  offAuto();
+  bag();
 };
 </script>
 
