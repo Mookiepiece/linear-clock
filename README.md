@@ -13,11 +13,11 @@ Take control of your day with visual time management.
 Linear clock:
 
 <a href="https://mookiepiece.github.io/linear-clock/">
-  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot1.jpg" alt="screenshot" />
+  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot1.png" alt="screenshot" />
 </a>
 
 Settings:
 
 <a href="https://mookiepiece.github.io/linear-clock/">
-  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot2.jpg" alt="screenshot" />
+  <img src="https://github.com/Mookiepiece/linear-clock/blob/main/assets/screenshot2.png" alt="screenshot" />
 </a>
