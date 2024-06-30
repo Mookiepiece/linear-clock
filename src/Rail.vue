@@ -65,6 +65,15 @@ const width = computed(() => {
   --color-fill: #fc3;
   --color-fill2: #f2b23a;
 
+  --fill-box-shadow: 5px 5px 5px var(--color-shadow),
+    -5px -5px 5px var(--color-shadow2);
+
+  --fill-background: linear-gradient(
+    110deg,
+    var(--color-fill),
+    var(--color-fill2)
+  );
+
   @media (prefers-color-scheme: dark) {
     & {
       --color-empty: #0000003a;
@@ -94,11 +103,9 @@ const width = computed(() => {
     position: relative;
     max-width: 100%;
     height: 100%;
-    background: linear-gradient(110deg, var(--color-fill), var(--color-fill2));
+    background: var(--fill-background);
     border-top-left-radius: 4px;
-    box-shadow:
-      5px 5px 5px var(--color-shadow),
-      -5px -5px 5px var(--color-shadow2);
+    box-shadow: var(--fill-box-shadow);
   }
 
   .label {
@@ -127,6 +134,14 @@ const width = computed(() => {
 
   &.Small {
     --rail-height: 10px;
+
+    --fill-box-shadow: 2px 2px 2px var(--color-shadow),
+      -2px -2px 2px var(--color-shadow2);
+
+    .bar,
+    .fill {
+      border-radius: 0;
+    }
   }
 }
 </style>

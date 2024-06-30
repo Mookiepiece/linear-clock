@@ -92,6 +92,12 @@ onMounted(() => {
   });
 });
 
+const subtitle = computed(() => {
+  const [now, [s, e]] = [ClockState.now, [marked.value[0]!, marked.value[1]!]];
+  const width = clamp(0, Number(((+now - +s) / (+e - +s)) * 100), 100);
+  return format.float(100 - width) + '%';
+});
+
 const open = ref(false);
 </script>
 
@@ -135,12 +141,18 @@ const open = ref(false);
       <button @click="open = true">
         <TIcon i="compass" />
       </button>
-      <Rail
-        v-if="marked.every(Boolean)"
-        class="Small"
-        :now="ClockState.now"
-        :range="[marked[0]!, marked[1]!]"
-      />
+      <div v-if="marked.every(Boolean)">
+        <Rail
+          class="Small"
+          :now="ClockState.now"
+          :range="[marked[0]!, marked[1]!]"
+        />
+        <span class="Typo --3">
+          {{ marked[0]!.format('HH:mm:ss') }} ~
+          {{ marked[1]!.format('HH:mm:ss') }}
+          <sub>{{ subtitle }}</sub>
+        </span>
+      </div>
     </footer>
     <Gear v-model:open="open" />
   </main>
