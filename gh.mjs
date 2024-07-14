@@ -1,3 +1,3 @@
 import ghpages from 'gh-pages';
 
-ghpages.publish('dist');
+ghpages.publish('dist', console.error);
