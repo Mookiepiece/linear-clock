@@ -159,10 +159,12 @@ watchEffect(onCleanup => {
     const time = pointer2RoundedTime(e);
 
     switch (pressed.value) {
-      case 'A':
+      case 'A': {
         state.a = time;
-        state.b = (state.b % DAY) + +(state.b < state.a) * DAY;
+        const _b = state.b % DAY;
+        state.b = _b + +(_b < state.a) * DAY;
         break;
+      }
       case 'B':
         state.b = time + +(time < state.a) * DAY;
         break;
