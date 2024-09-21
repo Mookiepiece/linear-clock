@@ -12,6 +12,10 @@
     "preinstall": "npx only-allow pnpm",
     "postinstall": "simple-git-hooks"
   },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
+  },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
   },

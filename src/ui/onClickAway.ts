@@ -10,6 +10,6 @@ export const onClickAway = (
   const elements = Array.isArray(ref) ? ref : [ref];
 
   return on(document).pointerdown(e => {
-    if (elements.every(el => el?.contains(e.target as Node) === false)) cb();
+    if (!elements.some(el => el.contains(e.target as Node))) cb();
   });
 };

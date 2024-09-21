@@ -5,15 +5,18 @@ const trapped: (HTMLElement | SVGElement)[] = [];
 /**
  * Focus Trap
  *
- * This only detects the focus event inside the document.
- * that means, the user is able to focus other buttons (e.g. bookmark) inside the browser's chrome.
+ * This only detects the `focusin` event inside the document. Catch the run away focus back, you may see browser scrolled to that thief.
+ *
+ * To prevent any scrolls, wrap your target element with two guardian <div tabindex='0'> and make sure they are inside viewport.
  *
  * when a new trap is set, current trap will temperary disabled and will recover when that pop.
+ *
+ * The element itself or one of it's children is required to be focusable. It is recommended to mark the element itself `tabindex="-1"`.
  */
 export const trap = (el: HTMLElement | SVGElement) => {
   trapped.push(el);
   const backTo = document.activeElement;
-  focusIn(el);
+  trapIn(el);
   const off = _trap(el);
 
   return () => {
@@ -42,12 +45,12 @@ const _trap = (el: HTMLElement | SVGElement) =>
             : 0;
 
       if (direction) {
-        focusIn(el, direction === -1);
+        trapIn(el, direction === -1);
       }
     }
   });
 
-const focusIn = (el: HTMLElement | SVGElement, reversed = false) => {
+export const trapIn = (el: HTMLElement | SVGElement, reversed = false) => {
   // focusable elements modified based on: https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/examples/dialog/
   // those are "maybe focusable" (e.g. <a> without herf attribute cannot be focusd), we have to try them out.
   const children = [

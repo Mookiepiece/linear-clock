@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { on } from '../ui/on';
 import { onClickAway } from '../ui/onClickAway';
 import { Bag } from '../ui/collection';
+import { trap } from '../ui/trap';
 
 const model = defineModel();
 
-defineProps<{
+const props = defineProps<{
   options: number[];
 }>();
 
@@ -69,6 +70,19 @@ const onEnter = () => {
   );
 };
 
+watchEffect(onCleanup => {
+  const [$open, $pop] = [open.value, popper.value];
+  if ($open && $pop) {
+    onCleanup(trap($pop));
+  }
+});
+const current = ref(
+  Math.max(
+    props.options.findIndex(i => i === model.value),
+    0,
+  ),
+);
+
 const onBeforeLeave = () => {
   bag();
 };
@@ -82,9 +96,23 @@ const onBeforeLeave = () => {
   <Teleport to="body">
     <Transition @enter="onEnter" @before-leave="onBeforeLeave">
       <div v-if="open" ref="popper" data-positioner>
-        <div data-popper-content>
-          <div role="listbox">
-            <div role="option" v-for="o of options" @click="() => submit(o)">
+        <div data-popper-content @keydown.esc="open = !open">
+          <div
+            role="listbox"
+            tabindex="0"
+            @keydown.left="
+              current = (current - 1 + options.length) % options.length
+            "
+            @keydown.right="current = (current + 1) % options.length"
+            @keydown.space.prevent="submit(options[current])"
+            @keydown.enter.prevent="submit(options[current])"
+          >
+            <div
+              role="option"
+              v-for="(o, i) of options"
+              @click="() => submit(o)"
+              :class="{ current: current === i }"
+            >
               {{ o }}
             </div>
           </div>
@@ -142,6 +170,7 @@ button {
 
 [role='listbox'] {
   display: flex;
+  outline: 0;
 }
 [role='option'] {
   width: 60px;
@@ -162,5 +191,10 @@ button {
     background-color: #0002;
   }
   cursor: pointer;
+}
+
+[role='listbox']:focus-visible .current {
+  outline: 2px solid;
+  outline-offset: -2px;
 }
 </style>

@@ -5,10 +5,17 @@ import { Ref, computed, reactive, ref, watch, watchEffect } from 'vue';
 import { ClockState } from './app';
 import DropdownButton from './components/DropdownButton.vue';
 import TIcon from './components/TIcon.vue';
+import { trap } from './ui/trap';
 
 const DAY = 24 * 3600 * 1000;
 
 const open = defineModel<boolean>('open');
+const root = ref<HTMLElement>();
+watchEffect(onCleanup => {
+  if (open.value && root.value) {
+    onCleanup(trap(root.value));
+  }
+});
 
 const state = reactive({ a: 0, b: 0 });
 
@@ -210,8 +217,15 @@ useHandler(handlerB, 'B');
 
 <template>
   <Teleport to="body">
+    <i-edge v-if="open" />
     <Transition>
-      <div class="GearModal" v-if="open">
+      <div
+        class="GearModal"
+        v-if="open"
+        tabindex="-1"
+        ref="root"
+        @keydown.esc.prevent="open = false"
+      >
         <main ref="main" :style="{ '--sizing': sizing + 'px' }">
           <div class="screen" ref="screen">
             <div
@@ -314,6 +328,7 @@ useHandler(handlerB, 'B');
         </footer>
       </div>
     </Transition>
+    <i-edge v-if="open" />
   </Teleport>
 </template>
 
