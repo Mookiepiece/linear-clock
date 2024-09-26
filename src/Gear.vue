@@ -19,8 +19,6 @@ watchEffect(onCleanup => {
 
 const state = reactive({ a: 0, b: 0 });
 
-const snapping = computed(() => ClockState.snapping);
-
 const volume = reactive({
   a: computed({ get: () => state.a / DAY, set: v => (state.a = v * DAY) }),
   b: computed({ get: () => state.b / DAY, set: v => (state.b = v * DAY) }),
@@ -40,7 +38,7 @@ watch(
 );
 
 const submit = () => {
-  ClockState.vivid = [state.a, state.b];
+  if (state.a !== state.b) ClockState.vivid = [state.a, state.b];
   open.value = false;
 };
 
@@ -72,8 +70,8 @@ const rainbowShadow = (() => {
   return reactive({ r, strokeWidth, dasharray, rotate });
 })();
 
-const dots = computed(() => {
-  return Array(24)
+const dots = computed(() =>
+  Array(24)
     .fill(0)
     .map((_, i) => {
       const deg = (i / 24) * Math.PI * 2;
@@ -83,8 +81,8 @@ const dots = computed(() => {
       const y = Math.round(Math.cos(deg) * r);
 
       return { i, x, y };
-    });
-});
+    }),
+);
 
 let pressed = ref<false | 'A' | 'B'>(false);
 let within = ref(false);
@@ -126,7 +124,7 @@ watchEffect(onCleanup => {
 
   const pointer2RoundedTime = (e: PointerEvent) => {
     const value = pointer2Value(e);
-    const _snapping = snapping.value * 60 * 1000;
+    const _snapping = ClockState.snapping * 60 * 1000;
     return Math.round((value * DAY) / _snapping) * _snapping;
   };
 

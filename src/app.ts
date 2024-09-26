@@ -33,14 +33,9 @@ export const ClockState = reactive({
   focusPeriod: [null, null] as [number | null, number | null],
 });
 
-const now = dayjs();
-setTimeout(
-  () =>
-    setInterval(() => {
-      ClockState.now = dayjs();
-      if (ClockState.now.date() !== ClockState.today.date()) {
-        ClockState.today = ClockState.now.startOf('day');
-      }
-    }, 1000),
-  1000 - (+now % 1000),
-);
+setInterval(() => {
+  ClockState.now = dayjs();
+  if (ClockState.now.date() !== ClockState.today.date()) {
+    ClockState.today = ClockState.now.startOf('day');
+  }
+}, 1000);

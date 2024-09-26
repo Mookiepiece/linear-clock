@@ -9,10 +9,14 @@ import Gear from './Gear.vue';
 import TIcon from './components/TIcon.vue';
 
 const range = computed(() => {
-  const today = dayjs().startOf('day');
+  const today = ClockState.today;
+
+  const yet =
+    +today + ClockState.vivid[0] > +ClockState.now ? -24 * 3600_000 : 0; // 23:45 -> 23:30
+
   return [
-    dayjs(+today + ClockState.vivid[0]),
-    dayjs(+today + ClockState.vivid[1]),
+    dayjs(+today + ClockState.vivid[0] + yet),
+    dayjs(+today + ClockState.vivid[1] + yet),
   ] as const;
 });
 
@@ -26,14 +30,17 @@ const rail = ref<HTMLDivElement>();
 const hover = ref(false);
 const active = ref(false);
 
-const pointed = reactive<(Dayjs | null)[]>([null, null]);
-const marked = computed(() => {
-  if (!pointed[0] || !pointed[1]) return pointed;
-  return +pointed[1] > +pointed[0] ? pointed : [...pointed].reverse();
+const _potato = reactive<(Dayjs | null)[]>([null, null]);
+const potato = computed({
+  get: () => {
+    if (!_potato[0] || !_potato[1]) return _potato;
+    return +_potato[1] > +_potato[0] ? _potato : [..._potato].reverse();
+  },
+  set: v => ([_potato[0], _potato[1]] = [v[0], v[1]]),
 });
 
-const markedLeft = computed(() =>
-  marked.value.map(d => {
+const potatoLeft = computed(() =>
+  potato.value.map(d => {
     if (!d) return '';
     const [s, e] = range.value;
     return ((+d - +s) / (+e - +s)) * 100 + '%';
@@ -49,6 +56,8 @@ const label = reactive({
 onMounted(() => {
   const $rail = rail.value!;
 
+  const toFixedMinute = (value: number) => Math.round(value / 60_000) * 60_000;
+
   const pointer2Value = (e: PointerEvent) => {
     const x = e.clientX;
     const { left, width } = $rail.getBoundingClientRect();
@@ -56,7 +65,7 @@ onMounted(() => {
   };
   const value2Day = (value: number) => {
     const [s, e] = range.value;
-    return dayjs(+s + (+e - +s) * value);
+    return dayjs(toFixedMinute(+s + (+e - +s) * value));
   };
 
   on($rail).pointermove(e => {
@@ -74,15 +83,15 @@ onMounted(() => {
     $rail.setPointerCapture(e.pointerId);
     active.value = true;
 
-    [pointed[0], pointed[1]] = [value2Day(pointer2Value(e)), null];
+    [_potato[0], _potato[1]] = [value2Day(pointer2Value(e)), null];
 
     const off1 = on($rail).pointermove(e => {
-      pointed[1] = value2Day(pointer2Value(e));
+      _potato[1] = value2Day(pointer2Value(e));
     });
     const off2 = on($rail).pointerup(e => {
-      pointed[1] = value2Day(pointer2Value(e));
+      _potato[1] = value2Day(pointer2Value(e));
 
-      if (+pointed[0]! === +pointed[1]) pointed[0] = pointed[1] = null;
+      if (+_potato[0]! === +_potato[1]) _potato[0] = _potato[1] = null;
 
       active.value = false;
 
@@ -93,7 +102,7 @@ onMounted(() => {
 });
 
 const subtitle = computed(() => {
-  const [now, [s, e]] = [ClockState.now, [marked.value[0]!, marked.value[1]!]];
+  const [now, [s, e]] = [ClockState.now, [potato.value[0]!, potato.value[1]!]];
   const width = clamp(0, Number(((+now - +s) / (+e - +s)) * 100), 100);
   return format.float(100 - width) + '%';
 });
@@ -122,13 +131,13 @@ const open = ref(false);
       </div>
       <div
         class="Mark A"
-        v-if="markedLeft[0]"
-        :style="{ left: markedLeft[0] }"
+        v-if="potatoLeft[0]"
+        :style="{ left: potatoLeft[0] }"
       ></div>
       <div
         class="Mark B"
-        v-if="markedLeft[1]"
-        :style="{ left: markedLeft[1] }"
+        v-if="potatoLeft[1]"
+        :style="{ left: potatoLeft[1] }"
       ></div>
 
       <span class="Typo --1" style="margin-top: 30px">
@@ -141,15 +150,15 @@ const open = ref(false);
       <button @click="open = true">
         <TIcon i="compass" />
       </button>
-      <div v-if="marked.every(Boolean)">
+      <div v-if="potato.every(Boolean)">
         <Rail
           class="Small"
           :now="ClockState.now"
-          :range="[marked[0]!, marked[1]!]"
+          :range="[potato[0]!, potato[1]!]"
         />
         <span class="Typo --3">
-          {{ marked[0]!.format('HH:mm:ss') }} ~
-          {{ marked[1]!.format('HH:mm:ss') }}
+          {{ potato[0]!.format('HH:mm:ss') }} ~
+          {{ potato[1]!.format('HH:mm:ss') }}
           <sub>{{ subtitle }}</sub>
         </span>
       </div>
